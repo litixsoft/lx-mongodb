@@ -8,8 +8,6 @@ _(Coming soon)_
 
 ### Install:
 
-#### Attention: is still in development
-
 ```javascript
 npm install lx-mongodb
 ```
