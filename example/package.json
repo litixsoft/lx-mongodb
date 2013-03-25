@@ -1,0 +1,13 @@
+{
+  "name": "lx-mongodb-example",
+  "description": "Litixsoft backend driver for mongoDb example.",
+  "version": "0.0.1",
+  "homepage": "https://github.com/litixsoft/lx-mongodb",
+  "author": {
+    "name": "Litixsoft GmbH",
+    "email": "info@litixsoft.de"
+  },
+  "dependencies": {
+    "async": "~0.2.5"
+  }
+}
