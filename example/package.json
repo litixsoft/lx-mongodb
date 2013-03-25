@@ -8,6 +8,7 @@
     "email": "info@litixsoft.de"
   },
   "dependencies": {
-    "async": "~0.2.5"
+    "async": "~0.2.5",
+    "lx-valid": "~0.2.0"
   }
 }

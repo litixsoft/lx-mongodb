@@ -1,6 +1,6 @@
-var
-    //db = require('../lib/bbdal').MongoDb('192.168.20.24,192.168.20.25,192.168.20.26/blog?slaveOk=true'),
-    db = require('../lib/bbdal').MongoDb('localhost/blog'),
+var bbDb = require('../lib/lx-mongodb'),
+    blogConnection = 'localhost/blog?w=1&journal=True&fsync=True',
+    db = bbDb.GetDb(blogConnection),
     ObjectID = require('mongodb').ObjectID,
     importFile = require('./import.json');
 

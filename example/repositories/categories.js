@@ -2,7 +2,7 @@ exports.CategoryRepository = function (baseRepo) {
     'use strict';
 
     var collection = baseRepo.getCollection(),
-        val = require('bbvalid'),
+        val = require('lx-valid'),
         schema = {
             'properties': {
                 '_id': {
