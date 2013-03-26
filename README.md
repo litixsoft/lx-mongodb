@@ -1,4 +1,4 @@
-# lx-mongodb
+# lx-mongodb [![Build Status](https://travis-ci.org/litixsoft/lx-mongodb.png?branch=master)](https://travis-ci.org/litixsoft/lx-mongodb)
 
 Litixsoft backend driver for mongoDb based on mongojs.
 
