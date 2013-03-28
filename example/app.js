@@ -21,7 +21,7 @@ function callback(err, res) {
 //blog.posts.getAll({limit: 3}, callback);
 //blog.posts.getTitles(callback);
 //blog.posts.getOneById_WR('511106fc574d81d815000001', callback);
-//blog.posts.getPostComments_WR('511106fc574d81d815000001', callback);
+blog.posts.getPostComments_WR('511106fc574d81d815000001', callback);
 
 //blog.tags.getAll(callback);
 //blog.categories.getAll(callback);
@@ -65,6 +65,6 @@ function callback(err, res) {
 //blog.users.getOne({userName:'diiimo_112'},callback);
 //blog.users.delete({userName:'diiimo_112'}, callback);
 
-blog.users.checkUserName('diiimo_1', callback);
+//blog.users.checkUserName('diiimo_1', callback);
 
-blog.posts.getTitles(callback);
+//blog.posts.getTitles(callback);
