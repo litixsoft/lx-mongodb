@@ -9,7 +9,7 @@ exports.UserRepository = function (baseRepo) {
                     'type': 'string',
                     'required': false
                 },
-                'bithday': {
+                'birthdate': {
                     'type': 'string',
                     'required': true,
                     'format': 'dateTime'
@@ -89,6 +89,8 @@ exports.UserRepository = function (baseRepo) {
         return schema;
     };
 
+    // Todo options: {dataset, schema || schema, isUpdate}
+
     baseRepo.validate = function (doc, isUpdate, schema, cb) {
 
         var emailCheck = true;
@@ -96,7 +98,7 @@ exports.UserRepository = function (baseRepo) {
 
         // check is update
         if (isUpdate) {
-
+            // Todo Prüfung auf required fields
             for (var schemaProp in schema.properties) {
                 if (schema.properties.hasOwnProperty(schemaProp)) {
                     if (!doc.hasOwnProperty(schemaProp)) {
@@ -135,8 +137,8 @@ exports.UserRepository = function (baseRepo) {
     };
 
     baseRepo.convert = function (doc) {
-        if (doc.hasOwnProperty('bithday') && typeof doc.bithday === 'string') {
-            doc.bithday = new Date(doc.bithday);
+        if (doc.hasOwnProperty('birthdate') && typeof doc.birthdate === 'string') {
+            doc.birthdate = new Date(doc.birthdate);
         }
 
         return doc;
