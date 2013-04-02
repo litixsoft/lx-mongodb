@@ -12,6 +12,10 @@ module.exports = function (grunt) {
             ' * Copyright (c) <%= grunt.template.today("yyyy") %> <%= pkg.author.name %>\n' +
             ' * Licensed <%= _.pluck(pkg.licenses, "type").join(", ") %>\n' +
             ' */\n\n',
+        // Before generating any new files, remove any previously-created files.
+        clean: {
+            build: ['build']
+        },
         jshint: {
             files: ['Gruntfile.js', 'lib/**/*.js', 'test/**/*.js'],
             junit: 'build/reports/jshint.xml',
@@ -58,16 +62,12 @@ module.exports = function (grunt) {
     });
 
     // Load tasks.
-    //noinspection JSUnresolvedFunction
     grunt.loadNpmTasks('grunt-contrib-jshint');
-    //noinspection JSUnresolvedFunction
     grunt.loadNpmTasks('grunt-contrib-watch');
-    //noinspection JSUnresolvedFunction
     grunt.loadNpmTasks('grunt-jasmine-node');
+    grunt.loadNpmTasks('grunt-contrib-clean');
 
     // Default task.
     //noinspection JSUnresolvedFunction
-    grunt.registerTask('default', ['jshint:files', 'jasmine_node']);
-    grunt.registerTask('test', ['jshint:files', 'jasmine_node']);
-    grunt.registerTask('server', ['jasmine_node']);
+    grunt.registerTask('test', ['clean', 'jshint:files', 'jasmine_node']);
 };
