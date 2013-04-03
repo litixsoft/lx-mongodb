@@ -13,7 +13,7 @@ function createUsers(cb) {
     var i, max;
     for (i = 0, max = users.length; i < max; i += 1) {
         users[i]._id = ObjectID.createFromHexString(users[i]._id);
-        users[i].birthday = new Date(users[i].birthday);
+        users[i].birthdate = new Date(users[i].birthdate);
     }
 
     userCollection.drop();
@@ -111,6 +111,7 @@ function createComments(cb) {
         }
     });
 }
+
 // posts
 function createPosts(cb) {
     'use strict';
@@ -147,6 +148,7 @@ function createPosts(cb) {
         }
     });
 }
+
 createUsers(function () {
     'use strict';
 

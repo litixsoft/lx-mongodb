@@ -18,10 +18,10 @@ function callback(err, res) {
 
 //blog.posts.getOne({_id:'511106fc574d81d815000001'}, callback);
 //blog.posts.getOneById('511106fc574d81d815000001', callback);
-blog.posts.getAll({limit: 3}, callback);
+//blog.posts.getAll({limit: 3}, callback);
 //blog.posts.getTitles(callback);
 //blog.posts.getOneById_WR('511106fc574d81d815000001', callback);
-//blog.posts.getPostComments_WR('511106fc574d81d815000001', callback);
+blog.posts.getPostComments_WR('511106fc574d81d815000001', callback);
 
 //blog.tags.getAll(callback);
 //blog.categories.getAll(callback);
@@ -54,7 +54,7 @@ blog.posts.getAll({limit: 3}, callback);
     'userName': 'diiimo_1',
     'firstName': 'Timo_1',
     'lastName': 'Liebetrau_1',
-    'bithday': '1973-06-01T15:49:00.000Z',
+    'birthdate': '1973-06-01T15:49:00.000Z',
     'email': 'diiimo_1@gmail.com'
  };
  **/
@@ -64,3 +64,7 @@ blog.posts.getAll({limit: 3}, callback);
 //blog.users.update({userName:'diiimo_112'},{$set:{firstName:'Timo_112',lastName:'Liebetrau:112'}},callback);
 //blog.users.getOne({userName:'diiimo_112'},callback);
 //blog.users.delete({userName:'diiimo_112'}, callback);
+
+//blog.users.checkUserName('diiimo_1', callback);
+
+//blog.posts.getTitles(callback);

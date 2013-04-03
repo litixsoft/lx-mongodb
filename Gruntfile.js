@@ -1,6 +1,8 @@
 module.exports = function (grunt) {
     'use strict';
 
+    var filesToCover = 'lib/**/*.js';
+
     // Project configuration.
     //noinspection JSUnresolvedFunction,JSUnresolvedVariable
     grunt.initConfig({
@@ -12,6 +14,10 @@ module.exports = function (grunt) {
             ' * Copyright (c) <%= grunt.template.today("yyyy") %> <%= pkg.author.name %>\n' +
             ' * Licensed <%= _.pluck(pkg.licenses, "type").join(", ") %>\n' +
             ' */\n\n',
+        // Before generating any new files, remove any previously-created files.
+        clean: {
+            build: ['build']
+        },
         jshint: {
             files: ['Gruntfile.js', 'lib/**/*.js', 'test/**/*.js'],
             junit: 'build/reports/jshint.xml',
@@ -27,33 +33,44 @@ module.exports = function (grunt) {
                 noarg: true,
                 noempty: true,
                 nonew: true,
+                regexp: true,
                 undef: true,
                 unused: true,
                 strict: true,
-                trailing: true,
                 indent: 4,
                 quotmark: 'single',
-                boss: true,
-                eqnull: true,
                 es5: true,
                 loopfunc: true,
-                sub: true,
                 browser: true,
-                jquery: true,
-                node: true,
-                white: true,
-                globals: {
-                    exports: true,
-                    describe: true,
-                    it: true,
-                    expect: true,
-                    bbConfig: true
-                }
+                node: true
             }
         },
         watch: {
             files: '<%= jshint.files %>',
             tasks: ['jshint:files']
+        },
+        // istanbul
+        instrument: {
+            files: filesToCover,
+            options: {
+                basePath: 'build/instrument/'
+            }
+        },
+        reloadTasks: {
+            rootPath: 'build/instrument/lib'
+        },
+        storeCoverage: {
+            options: {
+                dir: 'build/reports/code_coverage'
+            }
+        },
+        makeReport: {
+            src: 'build/reports/code_coverage/**/*.json',
+            options: {
+                type: 'cobertura',
+                dir: 'build/reports/code_coverage',
+                print: 'detail'
+            }
         },
         jasmine_node: {
             specNameMatcher: './*.spec', // load only specs containing specNameMatcher
@@ -70,15 +87,16 @@ module.exports = function (grunt) {
     });
 
     // Load tasks.
-    //noinspection JSUnresolvedFunction
     grunt.loadNpmTasks('grunt-contrib-jshint');
-    //noinspection JSUnresolvedFunction
     grunt.loadNpmTasks('grunt-contrib-watch');
-    //noinspection JSUnresolvedFunction
     grunt.loadNpmTasks('grunt-jasmine-node');
+    grunt.loadNpmTasks('grunt-contrib-clean');
+    grunt.loadNpmTasks('grunt-istanbul');
 
     // Default task.
     //noinspection JSUnresolvedFunction
-    grunt.registerTask('default', ['jshint:files', 'jasmine_node']);
-    grunt.registerTask('test', ['jshint:files', 'jasmine_node']);
+    grunt.registerTask('test', ['clean', 'jshint:files', 'jasmine_node']);
+
+    //noinspection JSUnresolvedFunction
+    grunt.registerTask('cover', ['clean', 'jshint:files', 'instrument', 'reloadTasks', 'jasmine_node', 'storeCoverage', 'makeReport']);
 };
