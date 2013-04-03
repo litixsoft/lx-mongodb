@@ -1,7 +1,7 @@
 module.exports = function (grunt) {
     'use strict';
 
-    var testFiles = 'test/**/*.js';
+    var filesToCover = 'lib/**/*.js';
 
     // Project configuration.
     //noinspection JSUnresolvedFunction,JSUnresolvedVariable
@@ -51,13 +51,13 @@ module.exports = function (grunt) {
         },
         // istanbul
         instrument: {
-            files: testFiles,
+            files: filesToCover,
             options: {
                 basePath: 'build/instrument/'
             }
         },
         reloadTasks: {
-            rootPath: 'build/instrument/test'
+            rootPath: 'build/instrument/lib'
         },
         storeCoverage: {
             options: {
