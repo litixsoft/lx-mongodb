@@ -419,6 +419,8 @@ describe('BaseRepo', function () {
                         repo.getOne({userName: 'bob'}, function (err, res1) {
                             expect(res1).toBeDefined();
                             expect(res1.userName).toBe('bob');
+                            expect(res1.lastName).toBe('Norris');
+                            expect(res1.email).toBe('chuck@norris.com');
 
                             done();
                         });
