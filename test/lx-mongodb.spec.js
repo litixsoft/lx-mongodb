@@ -4,18 +4,21 @@
 var ObjectID = require('mongodb').ObjectID;
 var sut = require('../lib/lx-mongodb');
 var connectionString = 'localhost/blog?w=1&journal=True&fsync=True';
-var user = {
-    firstName: 'Chuck',
-    lastName: 'Norris',
-    userName: 'chuck',
-    email: 'chuck@norris.com',
-    birthdate: new Date(2000, 10, 10)
-};
+var user = {};
+var userRepo = require('./fixtures/usersRepository').UserRepository(sut.BaseRepo(sut.GetDb(connectionString, ['users', 'posts', 'tags', 'categories', 'comments']).users));
 
 beforeEach(function () {
     // clear db
     var db = sut.GetDb(connectionString, ['users', 'posts', 'tags', 'categories', 'comments']);
     db.users.drop();
+
+    user = {
+        firstName: 'Chuck',
+        lastName: 'Norris',
+        userName: 'chuck',
+        email: 'chuck@norris.com',
+        birthdate: new Date(2000, 10, 10)
+    };
 });
 
 describe('lx-mongodb', function () {
@@ -220,6 +223,44 @@ describe('BaseRepo', function () {
             });
         });
 
+        it('should insert the new, valid document', function (done) {
+            var user = {
+                firstName: 'Chuck',
+                lastName: 'Norris',
+                userName: 'chuck',
+                email: 'chuck@norris.com',
+                birthdate: '1973-06-01T15:49:00.000Z',
+                age: 44
+            };
+
+            userRepo.create(user, function (error, result) {
+                expect(result).toBeDefined();
+                expect(Array.isArray(result)).toBeTruthy();
+                expect(result[0].firstName).toBe('Chuck');
+                expect(result[0].lastName).toBe('Norris');
+                expect(result[0].userName).toBe('chuck');
+                expect(result[0].email).toBe('chuck@norris.com');
+                expect(result[0].age).toBe(44);
+                expect(result[0].birthdate instanceof Date).toBeTruthy();
+
+                done();
+            });
+        });
+
+        it('should not insert an invalid document', function (done) {
+            var user = {
+                firstName: 'Chuck'
+            };
+
+            userRepo.create(user, function (error, result) {
+                expect(result).toBeDefined();
+                expect(result.valid).toBeFalsy();
+                expect(Array.isArray(result.errors)).toBeTruthy();
+
+                done();
+            });
+        });
+
         it('should throw an exception if the params are wrong', function () {
             var db = sut.GetDb(connectionString);
             var repo = sut.BaseRepo(db.users);
@@ -282,6 +323,134 @@ describe('BaseRepo', function () {
                     repo.getAll({}, {limit: 1}, function (err, res) {
                         expect(Array.isArray(res)).toBeTruthy();
                         expect(res.length).toBe(1);
+
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('should get all documents of the collection with skip', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.create(user, function () {
+                repo.create({userName: 'wayne'}, function () {
+                    repo.getAll({}, {skip: 1}, function (err, res) {
+                        expect(Array.isArray(res)).toBeTruthy();
+                        expect(res.length).toBe(1);
+                        expect(res[0].userName).toBe('wayne');
+
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('should get all documents of the collection with the specified fields Array', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+            var options = {
+                fields: ['userName', 'lastName']
+            };
+
+            repo.create(user, function () {
+                repo.create({userName: 'wayne'}, function () {
+                    repo.getAll({}, options, function (err, res) {
+                        expect(Array.isArray(res)).toBeTruthy();
+                        expect(res.length).toBe(2);
+
+                        expect(res[0].userName).toBe('chuck');
+                        expect(res[0].lastName).toBe('Norris');
+                        expect(res[0]._id).toBeDefined();
+                        expect(res[0].email).toBeUndefined();
+                        expect(res[0].birthdate).toBeUndefined();
+                        expect(Object.keys(res[0]).length).toBe(3);
+
+                        expect(res[1].userName).toBe('wayne');
+                        expect(res[1].lastName).toBeUndefined();
+                        expect(res[1].lastName).toBeUndefined();
+                        expect(Object.keys(res[1]).length).toBe(2);
+
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('should get all documents of the collection with the specified fields Object', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+            var options = {
+                fields: {
+                    'userName': 1,
+                    'lastName': 1
+                }
+            };
+
+            repo.create(user, function () {
+                repo.create({userName: 'wayne'}, function () {
+                    repo.getAll({}, options, function (err, res) {
+                        expect(Array.isArray(res)).toBeTruthy();
+                        expect(res.length).toBe(2);
+
+                        expect(res[0].userName).toBe('chuck');
+                        expect(res[0].lastName).toBe('Norris');
+                        expect(res[0]._id).toBeDefined();
+                        expect(res[0].email).toBeUndefined();
+                        expect(res[0].birthdate).toBeUndefined();
+                        expect(Object.keys(res[0]).length).toBe(3);
+
+                        expect(res[1].userName).toBe('wayne');
+                        expect(res[1].lastName).toBeUndefined();
+                        expect(res[1].lastName).toBeUndefined();
+                        expect(Object.keys(res[1]).length).toBe(2);
+
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('should get all documents of the collection with the specified sorting ascending', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+            var options = {
+                sortBy: 'userName',
+                sort: 1
+            };
+
+            repo.create(user, function () {
+                repo.create({userName: 'wayne'}, function () {
+                    repo.getAll({}, options, function (err, res) {
+                        expect(Array.isArray(res)).toBeTruthy();
+                        expect(res.length).toBe(2);
+
+                        expect(res[0].userName).toBe('chuck');
+                        expect(res[1].userName).toBe('wayne');
+
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('should get all documents of the collection with the specified sorting descending', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+            var options = {
+                sortBy: 'userName',
+                sort: -1
+            };
+
+            repo.create(user, function () {
+                repo.create({userName: 'wayne'}, function () {
+                    repo.getAll({}, options, function (err, res) {
+                        expect(Array.isArray(res)).toBeTruthy();
+                        expect(res.length).toBe(2);
+
+                        expect(res[0].userName).toBe('wayne');
+                        expect(res[1].userName).toBe('chuck');
 
                         done();
                     });
@@ -456,6 +625,34 @@ describe('BaseRepo', function () {
             expect(func1).toThrow();
             expect(func2).toThrow();
             expect(func3).toThrow();
+        });
+
+        it('should update the document of the collection', function (done) {
+            var user = {
+                firstName: 'Chuck',
+                lastName: 'Norris',
+                userName: 'chuck',
+                email: 'chuck@norris.com',
+                birthdate: '1973-06-01T15:49:00.000Z',
+                age: 44
+            };
+
+            userRepo.create(user, function () {
+                userRepo.update({userName: 'chuck'}, {userName: 'bob'}, function (err, res) {
+                    expect(res).toBeDefined();
+                    expect(res).toBe(1);
+
+                    userRepo.getOne({userName: 'bob'}, function (err, res1) {
+                        expect(res1).toBeDefined();
+                        expect(res1.userName).toBe('bob');
+                        expect(res1.lastName).toBe('Norris');
+                        expect(res1.email).toBe('chuck@norris.com');
+
+                        done();
+                    });
+                });
+
+            });
         });
     });
 
