@@ -1,4 +1,4 @@
-var bbDb = require('../lib/lx-mongodb'),
+var bbDb = require('../index.js'),
     blogConnection = 'localhost/blog?w=1&journal=True&fsync=True',
     //blogConnection = '192.168.20.24,192.168.20.25,192.168.20.26/blog?w=2&journal=True&fsync=True',
     blog = require('./repositories/blog').BlogRepository(bbDb, blogConnection);

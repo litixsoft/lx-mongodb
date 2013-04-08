@@ -2,7 +2,7 @@
 'use strict';
 
 var ObjectID = require('mongodb').ObjectID;
-var sut = require('../lib/lx-mongodb');
+var sut = require('../index.js');
 var connectionString = 'localhost/blog?w=1&journal=True&fsync=True';
 var user = {};
 var userRepo = require('./fixtures/usersRepository').UserRepository(sut.BaseRepo(sut.GetDb(connectionString, ['users', 'posts', 'tags', 'categories', 'comments']).users));
