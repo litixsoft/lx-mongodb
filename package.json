@@ -72,6 +72,8 @@
     },
     "dependencies": {
         "mongodb": "~1.2.13",
-        "mongojs": "~0.6.2"
+        "mongojs": "~0.6.2",
+        "async": "~0.2.6",
+        "lx-valid": "0.2.0"
     }
 }
