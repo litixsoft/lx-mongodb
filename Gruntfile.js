@@ -79,7 +79,7 @@ module.exports = function (grunt) {
             forceExit: true,
             jUnit: {
                 report: true,
-                savePath: './build/reports/jasmine/',
+                savePath: 'build/reports/jasmine/',
                 useDotNotation: true,
                 consolidate: true
             }

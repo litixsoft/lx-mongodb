@@ -7,7 +7,9 @@ exports.UserRepository = function (baseRepo) {
             'properties': {
                 '_id': {
                     'type': 'string',
-                    'required': false
+                    'id': '_id',
+                    'required': false,
+                    'format': 'mongo-id'
                 },
                 'birthdate': {
                     'type': 'string',
@@ -37,18 +39,6 @@ exports.UserRepository = function (baseRepo) {
                 }
             }
         };
-
-    collection.ensureIndex({'userName': 1}, {unique: true}, function (error) {
-        if (error) {
-            console.error(error);
-        }
-    });
-
-    collection.ensureIndex({'email': 1}, {unique: true}, function (error) {
-        if (error) {
-            console.error(error);
-        }
-    });
 
     baseRepo.setDefaultSortField('userName');
 
@@ -123,17 +113,17 @@ exports.UserRepository = function (baseRepo) {
         // json schema validate
         var valResult = val.validate(doc, schema);
 
-        // register async validator
-        if (userNameCheck) {
-            //noinspection JSUnresolvedVariable
-            val.asyncValidate.register(baseRepo.checkUserName, doc.userName);
-        }
-
-        // register async validator
-        if (emailCheck) {
-            //noinspection JSUnresolvedVariable
-            val.asyncValidate.register(baseRepo.checkUserEmail, doc.email);
-        }
+//        // register async validator
+//        if (userNameCheck) {
+//            //noinspection JSUnresolvedVariable
+//            val.asyncValidate.register(baseRepo.checkUserName, doc.userName);
+//        }
+//
+//        // register async validator
+//        if (emailCheck) {
+//            //noinspection JSUnresolvedVariable
+//            val.asyncValidate.register(baseRepo.checkUserEmail, doc.email);
+//        }
 
         // async validate
         //noinspection JSUnresolvedVariable
