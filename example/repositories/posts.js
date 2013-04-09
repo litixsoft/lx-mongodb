@@ -3,68 +3,96 @@ exports.PostRepository = function (baseRepo) {
 
     var collection = baseRepo.getCollection(),
         schema = {
-        'properties': {
-            '_id': {
-                'type': 'string',
-                'required': false
-            },
-            'author': {
-                'type': 'string',
-                'required': true,
-                'format': 'mongo-id'
-            },
-            'body': {
-                'type': 'string',
-                'required': true
-            },
-            'category': {
-                'type': 'string',
-                'required': true,
-                'format': 'mongo-id'
-            },
-            'comments': {
-                'type': 'array',
-                'required': false,
-                'items':
-                {
-                    'type': 'object',
+            'properties': {
+                '_id': {
+                    'type': 'string',
+                    'required': false
+                },
+                'author': {
+                    'type': 'string',
                     'required': true,
-                    'properties': {
-                        '_id': {
-                            'type': 'string',
-                            'required': true,
-                            'format': 'mongo-id'
+                    'format': 'mongo-id'
+                },
+                'publisher_id': {
+                    'type': 'string',
+                    'required': true,
+                    'format': 'mongo-id'
+                },
+                'body': {
+                    'type': 'string',
+                    'required': true
+                },
+                'category': {
+                    'type': 'string',
+                    'required': true,
+                    'format': 'mongo-id'
+                },
+                'comments': {
+                    'type': 'array',
+                    'required': false,
+                    'items': {
+                        'type': 'object',
+                        'required': true,
+                        'properties': {
+                            '_id': {
+                                'type': 'string',
+                                'required': true,
+                                'format': 'mongo-id'
+                            }
+                        }
+                    }
+                },
+                'created': {
+                    'type': 'string',
+                    'required': true,
+                    'format': 'dateTime'
+                },
+                'tags': {
+                    'type': 'array',
+                    'required': false,
+                    'items': {
+                        'type': 'object',
+                        'required': true,
+                        'properties': {
+                            '_id': {
+                                'type': 'string',
+                                'required': true,
+                                'format': 'mongo-id'
+                            }
+                        }
+                    }
+                },
+                'title': {
+                    'type': 'string',
+                    'required': true
+                },
+                locations: {
+                    'type': 'array',
+                    'required': true,
+                    'items': {
+                        'type': 'object',
+                        'required': false,
+                        'properties': {
+                            '_id': {
+                                'type': 'string',
+                                'required': true,
+                                'format': 'mongo-id'
+                            },
+                            name: {
+                                'type': 'string',
+                                'required': false
+                            },
+                            date: {
+                                'type': 'string',
+                                'required': false,
+                                'format': 'dateTime'
+                            }
                         }
                     }
                 }
-            },
-            'created': {
-                'type': 'string',
-                'required': true,
-                'format': 'dateTime'
-            },
-            'tags': {
-                'type': 'array',
-                'required': false,
-                'items':
-                {
-                    'type': 'object',
-                    'required': true,
-                    'properties': {
-                        '_id': {
-                            'type': 'string',
-                            'required': true,
-                            'format': 'mongo-id'
-                        }
-                    }
-                }
-            },
-            'title': {
-                'type': 'string',
-                'required': true
+
             }
-        }
-    };
+        };
 
     collection.ensureIndex({'created': 1}, null, function (error) {
         if (error) {
