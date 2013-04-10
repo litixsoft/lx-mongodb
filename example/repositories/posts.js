@@ -1,19 +1,15 @@
-exports.PostRepository = function (baseRepo) {
+exports.PostRepository = function (collection, lxDb) {
     'use strict';
 
-    var collection = baseRepo.getCollection(),
-        schema = {
+    var schema = {
             'properties': {
                 '_id': {
                     'type': 'string',
-                    'required': false
+                    'required': false,
+                    'format': 'mongo-id',
+                    'key': true
                 },
                 'author': {
-                    'type': 'string',
-                    'required': true,
-                    'format': 'mongo-id'
-                },
-                'publisher_id': {
                     'type': 'string',
                     'required': true,
                     'format': 'mongo-id'
@@ -45,7 +41,8 @@ exports.PostRepository = function (baseRepo) {
                 'created': {
                     'type': 'string',
                     'required': true,
-                    'format': 'dateTime'
+                    'format': 'dateTime',
+                    'sort': true
                 },
                 'tags': {
                     'type': 'array',
@@ -65,46 +62,16 @@ exports.PostRepository = function (baseRepo) {
                 'title': {
                     'type': 'string',
                     'required': true
-                },
-                locations: {
-                    'type': 'array',
-                    'required': true,
-                    'items': {
-                        'type': 'object',
-                        'required': false,
-                        'properties': {
-                            '_id': {
-                                'type': 'string',
-                                'required': true,
-                                'format': 'mongo-id'
-                            },
-                            name: {
-                                'type': 'string',
-                                'required': false
-                            },
-                            date: {
-                                'type': 'string',
-                                'required': false,
-                                'format': 'dateTime'
-                            }
-                        }
-                    }
                 }
-
             }
-        };
+        },
+        baseRepo = lxDb.BaseRepo(collection, schema);
 
     collection.ensureIndex({'created': 1}, null, function (error) {
         if (error) {
             console.error(error);
         }
     });
-
-    baseRepo.setDefaultSortField('created');
-
-    baseRepo.getSchema = function () {
-        return schema;
-    };
 
     baseRepo.getTitles = function (options, cb) {
 

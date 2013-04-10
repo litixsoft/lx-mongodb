@@ -1,30 +1,28 @@
-exports.CommentRepository = function (baseRepo) {
+exports.CommentRepository = function (collection, lxDb) {
     'use strict';
 
-    var collection = baseRepo.getCollection(),
-        schema = {
+    var schema = {
             'properties': {
                 '_id': {
                     'type': 'string',
-                    'id': '_id',
-                    'required': false
+                    'required': false,
+                    'format': 'mongo-id',
+                    'key': true
                 },
                 'author': {
                     'type': 'string',
-                    'id': 'author',
                     'required': true,
                     'format': 'mongo-id'
                 },
                 'body': {
                     'type': 'string',
-                    'id': 'body',
                     'required': true
                 },
                 'created': {
                     'type': 'string',
-                    'id': 'created',
                     'required': true,
-                    'format': 'dateTime'
+                    'format': 'dateTime',
+                    'sort': true
                 },
                 'subject': {
                     'type': 'string',
@@ -32,15 +30,14 @@ exports.CommentRepository = function (baseRepo) {
                     'required': true
                 }
             }
-        };
+        },
+        baseRepo = lxDb.BaseRepo(collection, schema);
 
     collection.ensureIndex({'created': 1}, null, function (error) {
         if (error) {
             console.error(error);
         }
     });
-
-    baseRepo.setDefaultSortField('created');
 
     baseRepo.getSchema = function () {
         return schema;
