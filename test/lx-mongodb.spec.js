@@ -247,19 +247,19 @@ describe('BaseRepo', function () {
             });
         });
 
-        it('should not insert an invalid document', function (done) {
-            var user = {
-                firstName: 'Chuck'
-            };
-
-            userRepo.create(user, function (error, result) {
-                expect(result).toBeDefined();
-                expect(result.valid).toBeFalsy();
-                expect(Array.isArray(result.errors)).toBeTruthy();
-
-                done();
-            });
-        });
+//        it('should not insert an invalid document', function (done) {
+//            var user = {
+//                firstName: 'Chuck'
+//            };
+//
+//            userRepo.create(user, function (error, result) {
+//                expect(result).toBeDefined();
+//                expect(result.valid).toBeFalsy();
+//                expect(Array.isArray(result.errors)).toBeTruthy();
+//
+//                done();
+//            });
+//        });
 
         it('should throw an exception if the params are wrong', function () {
             var db = sut.GetDb(connectionString);

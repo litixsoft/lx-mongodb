@@ -93,10 +93,12 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-istanbul');
 
-    // Default task.
-    //noinspection JSUnresolvedFunction
+    // Test task.
     grunt.registerTask('test', ['clean', 'jshint:files', 'jasmine_node']);
 
-    //noinspection JSUnresolvedFunction
+    // Default task.
+    grunt.registerTask('default', ['test']);
+
+    // CI task.
     grunt.registerTask('cover', ['clean', 'jshint:files', 'instrument', 'reloadTasks', 'jasmine_node', 'storeCoverage', 'makeReport']);
 };
