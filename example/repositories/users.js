@@ -1,13 +1,14 @@
-exports.UserRepository = function (baseRepo) {
+exports.UserRepository = function (collection, lxDb) {
     'use strict';
 
-    var collection = baseRepo.getCollection(),
-        val = require('lx-valid'),
+    var val = require('lx-valid'),
         schema = {
             'properties': {
                 '_id': {
                     'type': 'string',
-                    'required': false
+                    'required': false,
+                    'format': 'mongo-id',
+                    'key': true
                 },
                 'birthdate': {
                     'type': 'string',
@@ -29,14 +30,16 @@ exports.UserRepository = function (baseRepo) {
                 },
                 'userName': {
                     'type': 'string',
-                    'required': true
+                    'required': true,
+                    'sort': true
                 },
                 'age': {
                     'type': 'integer',
                     'required': false
                 }
             }
-        };
+        },
+        baseRepo = lxDb.BaseRepo(collection, schema);
 
     collection.ensureIndex({'userName': 1}, {unique: true}, function (error) {
         if (error) {
@@ -49,8 +52,6 @@ exports.UserRepository = function (baseRepo) {
             console.error(error);
         }
     });
-
-    baseRepo.setDefaultSortField('userName');
 
     // validators
     baseRepo.checkUserName = function (userName, cb) {
