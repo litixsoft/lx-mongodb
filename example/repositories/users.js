@@ -12,7 +12,7 @@ exports.UserRepository = function (baseRepo) {
                 'birthdate': {
                     'type': 'string',
                     'required': true,
-                    'format': 'dateTime'
+                    'format': 'date-time'
                 },
                 'email': {
                     'type': 'string',
@@ -121,7 +121,7 @@ exports.UserRepository = function (baseRepo) {
         }
 
         // json schema validate
-        var valResult = val.validate(doc, schema);
+        var valResult = val.validate(doc, schema, baseRepo.getValidationOptions());
 
         // register async validator
         if (userNameCheck) {
