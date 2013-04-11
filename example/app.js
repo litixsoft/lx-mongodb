@@ -52,25 +52,41 @@ function callback(err, res) {
 //
 var user = {
     'userName': 'diiimo_3',
-    'firstName': 'Timo_1',
+    'firstName': 'wayne',
     'lastName': 'Liebetrau_1',
     'birthdate': '1973-06-01T15:49:00.000Z',
     'email': 'diiimo_3@gmail.com',
     'prop': 66
 };
 
+var updateUser = {
+    lastName: 'Test',
+    location: {
+        street: 'weg',
+        zip: '12345',
+        cars: [
+            {id: 1, name: 'auto1'},
+            {id: 2, name: 'auto2'}
+        ],
+        door: {
+            hasKey: true,
+            numberOfKeys: 5
+        }
+    }
+};
+
 //blog.users.update({userName: 'diiimo_1'}, user, callback());
 
 //blog.posts.getOne({'comments._id': '5114cefe35b7e4680d000001'}, callback);
 
-blog.users.getCollection().drop();
-
+//blog.users.getCollection().drop();
+blog.users.update({userName: 'diiimo_3'}, {'$set': updateUser}, callback);
 //blog.users.delete({userName: user.userName}, callback);
-blog.users.validate(user, false, blog.users.getSchema(), function(err, res) {
-    console.dir(res);
-
-    blog.users.create(user, callback);
-});
+//blog.users.validate(user, false, blog.users.getSchema(), function(err, res) {
+//    console.dir(res);
+//
+//    blog.users.create(user, callback);
+//});
 //blog.users.update({userName: user.userName},{$set:{firstName: 'Timo_112',lastName: 'Liebetrau:112'}}, callback);
 //blog.users.update({userName:'diiimo_112'},{$set:{firstName:'Timo_112',lastName:'Liebetrau:112'}},callback);
 //blog.users.getOne({userName:'diiimo_112'},callback);
