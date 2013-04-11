@@ -1,17 +1,19 @@
-exports.CategoryRepository = function (baseRepo) {
+exports.CategoryRepository = function (collection, lxDb) {
     'use strict';
 
-    var collection = baseRepo.getCollection(),
-        val = require('lx-valid'),
+    var val = require('lx-valid'),
         schema = {
             'properties': {
                 '_id': {
                     'type': 'string',
-                    'required': false
+                    'required': false,
+                    'format': 'mongo-id',
+                    'key': true
                 },
                 'catName': {
                     'type': 'string',
-                    'required': true
+                    'required': true,
+                    'sort': true
                 },
                 'created': {
                     'type': 'string',
@@ -23,15 +25,14 @@ exports.CategoryRepository = function (baseRepo) {
                     'required': true
                 }
             }
-        };
+        },
+        baseRepo = lxDb.BaseRepo(collection, schema);
 
     collection.ensureIndex({'catName': 1}, {unique: true}, function (error) {
         if (error) {
             console.error(error);
         }
     });
-
-    baseRepo.setDefaultSortField('catName');
 
     // validators
     baseRepo.checkCatName = function (catName, cb) {

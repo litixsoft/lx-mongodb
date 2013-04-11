@@ -1,28 +1,29 @@
-exports.TagRepository = function (baseRepo) {
+exports.TagRepository = function (collection, lxDb) {
     'use strict';
 
-    var collection = baseRepo.getCollection(),
-        val = require('lx-valid'),
+    var val = require('lx-valid'),
         schema = {
             'properties': {
                 '_id': {
                     'type': 'string',
-                    'required': false
+                    'required': false,
+                    'format': 'mongo-id',
+                    'key': true
                 },
                 'tagName': {
                     'type': 'string',
-                    'required': true
+                    'required': true,
+                    'sort': true
                 }
             }
-        };
+        },
+        baseRepo = lxDb.BaseRepo(collection, schema);
 
     collection.ensureIndex({'tagName': 1}, {unique: true}, function (error) {
         if (error) {
             console.error(error);
         }
     });
-
-    baseRepo.setDefaultSortField('tagName');
 
     // validators
     baseRepo.checkTagName = function (tagName, cb) {

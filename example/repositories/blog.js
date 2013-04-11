@@ -1,4 +1,4 @@
-exports.BlogRepository = function (bbDb, blogConnection) {
+exports.BlogRepository = function (lxDb, blogConnection) {
     'use strict';
 
     if (arguments.length < 2) {
@@ -6,13 +6,13 @@ exports.BlogRepository = function (bbDb, blogConnection) {
     }
 
     //noinspection JSUnresolvedVariable
-    var db = bbDb.GetDb(blogConnection, ['users', 'posts', 'tags', 'categories', 'comments']),
+    var db = lxDb.GetDb(blogConnection, ['users', 'posts', 'tags', 'categories', 'comments']),
         async = require('async'),
-        userRepo = require('./users').UserRepository(bbDb.BaseRepo(db.users)),
-        postRepo = require('./posts').PostRepository(bbDb.BaseRepo(db.posts)),
-        tagRepo = require('./tags').TagRepository(bbDb.BaseRepo(db.tags)),
-        categoryRepo = require('./categories').CategoryRepository(bbDb.BaseRepo(db.categories)),
-        commentRepo = require('./comments').CommentRepository(bbDb.BaseRepo(db.comments));
+        userRepo = require('./users').UserRepository(db.users, lxDb),
+        postRepo = require('./posts').PostRepository(db.posts, lxDb),
+        tagRepo = require('./tags').TagRepository(db.tags, lxDb),
+        categoryRepo = require('./categories').CategoryRepository(db.categories, lxDb),
+        commentRepo = require('./comments').CommentRepository(db.comments, lxDb);
 
     // Helper
 
