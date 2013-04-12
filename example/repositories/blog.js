@@ -8,7 +8,7 @@ exports.BlogRepository = function (lxDb, blogConnection) {
     //noinspection JSUnresolvedVariable
     var db = lxDb.GetDb(blogConnection, ['users', 'posts', 'tags', 'categories', 'comments']),
         async = require('async'),
-        userRepo = require('./users').UserRepository(db.users, lxDb),
+        userRepo = require('./users').UserRepository(db.users),
         postRepo = require('./posts').PostRepository(db.posts, lxDb),
         tagRepo = require('./tags').TagRepository(db.tags, lxDb),
         categoryRepo = require('./categories').CategoryRepository(db.categories, lxDb),

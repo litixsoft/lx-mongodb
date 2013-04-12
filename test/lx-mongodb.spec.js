@@ -2,10 +2,10 @@
 'use strict';
 
 var ObjectID = require('mongodb').ObjectID;
-var sut = require('../index.js');
+var sut = require('../lib/lx-mongodb.js');
 var connectionString = 'localhost/blog?w=1&journal=True&fsync=True';
 var user = {};
-var userRepo = require('./fixtures/usersRepository').UserRepository(sut.BaseRepo(sut.GetDb(connectionString, ['users', 'posts', 'tags', 'categories', 'comments']).users));
+var userRepo = require('./fixtures/usersRepository').UserRepository(sut.GetDb(connectionString, ['users', 'posts', 'tags', 'categories', 'comments']).users);
 
 beforeEach(function () {
     // clear db
@@ -82,18 +82,6 @@ describe('BaseRepo', function () {
         expect(func4).toThrow();
     });
 
-    it('has a default idField "_id"', function () {
-        var repo = sut.BaseRepo('users');
-
-        expect(repo.getIdFieldName()).toBe('_id');
-    });
-
-    it('has a default defaultSortField "_id"', function () {
-        var repo = sut.BaseRepo('users');
-
-        expect(repo.getDefaultSortFieldName()).toBe('_id');
-    });
-
     it('has a function getCollection() which should return the collection', function () {
         var db = sut.GetDb(connectionString);
         var repo = sut.BaseRepo(db.users);
@@ -104,14 +92,16 @@ describe('BaseRepo', function () {
     });
 
     it('has a function createNewId() which should return a new mongo ObjectID', function () {
-        var repo = sut.BaseRepo('users');
+        var db = sut.GetDb(connectionString);
+        var repo = sut.BaseRepo(db.users);
 
         expect(typeof repo.createNewId()).toBe('object');
         expect(repo.createNewId() instanceof ObjectID).toBeTruthy();
     });
 
     it('has a function convertId() which should convert a mongo ObjectID to a string and vice versa', function () {
-        var repo = sut.BaseRepo('users');
+        var db = sut.GetDb(connectionString);
+        var repo = sut.BaseRepo(db.users);
         var id = '5108e9333cb086801f000035';
         var _id = new ObjectID(id);
 
@@ -145,64 +135,21 @@ describe('BaseRepo', function () {
         });
     });
 
-    describe('has a function setDefaultSortField() which', function () {
-        it('should set the defaultSortField of the BaseRepo', function () {
-            var repo = sut.BaseRepo('users');
-            repo.setDefaultSortField('name');
+    it('has a function getSchema() which should return the schema', function () {
+        var db = sut.GetDb(connectionString);
+        var repo = sut.BaseRepo(db.users);
+        var schema = repo.getSchema();
+        var userSchema = userRepo.getSchema();
 
-            expect(repo.getDefaultSortFieldName()).toBe('name');
-        });
+        expect(typeof schema).toBe('object');
+        expect(typeof userSchema).toBe('object');
 
-        it('should throw an exception when the param "defaultSortFieldName" is not of type String', function () {
-            var repo = sut.BaseRepo('users');
-            var func1 = function () { return repo.setDefaultSortField(); };
-            var func2 = function () { return repo.setDefaultSortField([]); };
-            var func3 = function () { return repo.setDefaultSortField({}); };
-            var func4 = function () { return repo.setDefaultSortField(1); };
-            var func5 = function () { return repo.setDefaultSortField(new Date()); };
-            var func6 = function () { return repo.setDefaultSortField(function () {}); };
-            var func7 = function () { return repo.setDefaultSortField(null); };
-            var func8 = function () { return repo.setDefaultSortField(undefined); };
+        userSchema.properties.userName.required = false;
 
-            expect(func1).toThrow();
-            expect(func2).toThrow();
-            expect(func3).toThrow();
-            expect(func4).toThrow();
-            expect(func5).toThrow();
-            expect(func6).toThrow();
-            expect(func7).toThrow();
-            expect(func8).toThrow();
-        });
-    });
+        var userSchema2 = userRepo.getSchema();
 
-    describe('has a function setIdField() which', function () {
-        it('should set the id field of the BaseRepo', function () {
-            var repo = sut.BaseRepo('users');
-            repo.setIdField('id');
-
-            expect(repo.getIdFieldName()).toBe('id');
-        });
-
-        it('should throw an exception when the param "idFieldName" is not of type String', function () {
-            var repo = sut.BaseRepo('users');
-            var func1 = function () { return repo.setIdField(); };
-            var func2 = function () { return repo.setIdField([]); };
-            var func3 = function () { return repo.setIdField({}); };
-            var func4 = function () { return repo.setIdField(1); };
-            var func5 = function () { return repo.setIdField(new Date()); };
-            var func6 = function () { return repo.setIdField(function () {}); };
-            var func7 = function () { return repo.setIdField(null); };
-            var func8 = function () { return repo.setIdField(undefined); };
-
-            expect(func1).toThrow();
-            expect(func2).toThrow();
-            expect(func3).toThrow();
-            expect(func4).toThrow();
-            expect(func5).toThrow();
-            expect(func6).toThrow();
-            expect(func7).toThrow();
-            expect(func8).toThrow();
-        });
+        expect(typeof userSchema2).toBe('object');
+        expect(userSchema2.properties.userName.required).toBeTruthy();
     });
 
     describe('has a function create() which', function () {
@@ -222,44 +169,6 @@ describe('BaseRepo', function () {
                 done();
             });
         });
-
-        it('should insert the new, valid document', function (done) {
-            var user = {
-                firstName: 'Chuck',
-                lastName: 'Norris',
-                userName: 'chuck',
-                email: 'chuck@norris.com',
-                birthdate: '1973-06-01T15:49:00.000Z',
-                age: 44
-            };
-
-            userRepo.create(user, function (error, result) {
-                expect(result).toBeDefined();
-                expect(Array.isArray(result)).toBeTruthy();
-                expect(result[0].firstName).toBe('Chuck');
-                expect(result[0].lastName).toBe('Norris');
-                expect(result[0].userName).toBe('chuck');
-                expect(result[0].email).toBe('chuck@norris.com');
-                expect(result[0].age).toBe(44);
-                expect(result[0].birthdate instanceof Date).toBeTruthy();
-
-                done();
-            });
-        });
-
-//        it('should not insert an invalid document', function (done) {
-//            var user = {
-//                firstName: 'Chuck'
-//            };
-//
-//            userRepo.create(user, function (error, result) {
-//                expect(result).toBeDefined();
-//                expect(result.valid).toBeFalsy();
-//                expect(Array.isArray(result.errors)).toBeTruthy();
-//
-//                done();
-//            });
-//        });
 
         it('should throw an exception if the params are wrong', function () {
             var db = sut.GetDb(connectionString);
@@ -457,6 +366,39 @@ describe('BaseRepo', function () {
                 });
             });
         });
+
+        it('should get all documents of the collection with the default sorting', function (done) {
+            userRepo.create(user, function () {
+                userRepo.create({userName: 'aaa'}, function () {
+                    userRepo.getAll(function (err, res) {
+                        expect(Array.isArray(res)).toBeTruthy();
+                        expect(res.length).toBe(2);
+
+                        expect(res[0].userName).toBe('aaa');
+                        expect(res[1].userName).toBe('chuck');
+
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('should get all documents of the collection and convert the id in the query to mongo id', function (done) {
+            userRepo.create(user, function (err, res) {
+                var id = res[0]._id;
+
+                userRepo.create({userName: 'aaa', chief_id: id}, function () {
+                    userRepo.getAll({chief_id : id.toHexString()}, function (err, res1) {
+                        expect(Array.isArray(res1)).toBeTruthy();
+                        expect(res1.length).toBe(1);
+                        expect(res1[0].userName).toBe('aaa');
+                        expect(res1[0].chief_id.toHexString()).toBe(id.toHexString());
+
+                        done();
+                    });
+                });
+            });
+        });
     });
 
     describe('has a function getOne() which', function () {
@@ -581,7 +523,7 @@ describe('BaseRepo', function () {
 
             repo.create(user, function () {
                 repo.create({userName: 'wayne'}, function () {
-                    repo.update({userName: 'chuck'}, {userName: 'bob'}, function (err, res) {
+                    repo.update({userName: 'chuck'}, {'$set': {userName: 'bob'}}, function (err, res) {
                         expect(res).toBeDefined();
                         expect(res).toBe(1);
 
@@ -638,7 +580,7 @@ describe('BaseRepo', function () {
             };
 
             userRepo.create(user, function () {
-                userRepo.update({userName: 'chuck'}, {userName: 'bob'}, function (err, res) {
+                userRepo.update({userName: 'chuck'}, {'$set': {userName: 'bob'}}, function (err, res) {
                     expect(res).toBeDefined();
                     expect(res).toBe(1);
 

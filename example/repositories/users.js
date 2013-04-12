@@ -1,8 +1,11 @@
-exports.UserRepository = function (collection, lxDb) {
+var lxDb = require('../../lib/lx-mongodb');
+
+exports.UserRepository = function (collection) {
     'use strict';
 
-    var val = require('lx-valid'),
-        schema = {
+    var val = require('lx-valid');
+    var schema = function () {
+        return {
             'properties': {
                 '_id': {
                     'type': 'string',
@@ -31,15 +34,16 @@ exports.UserRepository = function (collection, lxDb) {
                 'userName': {
                     'type': 'string',
                     'required': true,
-                    'sort': true
+                    'sort': 1
                 },
                 'age': {
                     'type': 'integer',
                     'required': false
                 }
             }
-        },
-        baseRepo = lxDb.BaseRepo(collection, schema);
+        };
+    };
+    var baseRepo = lxDb.BaseRepo(collection, schema);
 
     collection.ensureIndex({'userName': 1}, {unique: true}, function (error) {
         if (error) {
@@ -90,9 +94,9 @@ exports.UserRepository = function (collection, lxDb) {
         });
     };
 
-    baseRepo.getSchema = function () {
-        return schema;
-    };
+//    baseRepo.getSchema = function () {
+//        return schema;
+//    };
 
     // Todo options: {dataset, schema || schema, isUpdate}
 

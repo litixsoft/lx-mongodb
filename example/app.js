@@ -16,7 +16,7 @@ function callback(err, res) {
     }
 }
 
-blog.posts.getOne({_id:'511106fc574d81d815000001'}, callback);
+//blog.posts.getOne({_id:'511106fc574d81d815000001'}, callback);
 //blog.posts.getOneById('511106fc574d81d815000001', callback);
 //blog.posts.getAll({limit: 3, sort:-1}, callback);
 //blog.posts.getTitles(callback);
@@ -81,7 +81,10 @@ var updateUser = {
 //blog.posts.getOne({'comments._id': '5114cefe35b7e4680d000001'}, callback);
 
 //blog.users.getCollection().drop();
-blog.users.update({userName: 'diiimo_3'}, {'$set': updateUser}, callback);
+blog.users.getAll(callback);
+
+console.dir(blog.users.getSchema());
+//blog.users.update({userName: 'diiimo_3'}, {'$set': updateUser}, callback);
 //blog.users.delete({userName: user.userName}, callback);
 //blog.users.validate(user, false, blog.users.getSchema(), function(err, res) {
 //    console.dir(res);

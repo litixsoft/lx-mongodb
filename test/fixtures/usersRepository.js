@@ -1,20 +1,27 @@
-exports.UserRepository = function (baseRepo) {
-    'use strict';
+'use strict';
 
-    var collection = baseRepo.getCollection(),
-        val = require('lx-valid'),
-        schema = {
+var lxDb = require('../../lib/lx-mongodb');
+
+exports.UserRepository = function (collection) {
+    var val = require('lx-valid');
+    var schema = function () {
+        return {
             'properties': {
                 '_id': {
                     'type': 'string',
-                    'id': '_id',
+                    'required': false,
+                    'format': 'mongo-id',
+                    'key': true
+                },
+                'chief_id': {
+                    'type': 'string',
                     'required': false,
                     'format': 'mongo-id'
                 },
                 'birthdate': {
                     'type': 'string',
                     'required': true,
-                    'format': 'dateTime'
+                    'format': 'date-time'
                 },
                 'email': {
                     'type': 'string',
@@ -31,7 +38,8 @@ exports.UserRepository = function (baseRepo) {
                 },
                 'userName': {
                     'type': 'string',
-                    'required': true
+                    'required': true,
+                    'sort': 1
                 },
                 'age': {
                     'type': 'integer',
@@ -39,8 +47,8 @@ exports.UserRepository = function (baseRepo) {
                 }
             }
         };
-
-    baseRepo.setDefaultSortField('userName');
+    };
+    var baseRepo = lxDb.BaseRepo(collection, schema);
 
     // validators
     baseRepo.checkUserName = function (userName, cb) {
@@ -77,10 +85,6 @@ exports.UserRepository = function (baseRepo) {
                 cb(null, {valid: true});
             }
         });
-    };
-
-    baseRepo.getSchema = function () {
-        return schema;
     };
 
     // Todo options: {dataset, schema || schema, isUpdate}
