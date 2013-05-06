@@ -1,7 +1,7 @@
-var bbDb = require('../lib/lx-mongodb'),
+var lxDb = require('../lib/lx-mongodb'),
     blogConnection = 'localhost/blog?w=1&journal=True&fsync=True',
     //blogConnection = '192.168.20.24,192.168.20.25,192.168.20.26/blog?w=2&journal=True&fsync=True',
-    blog = require('./repositories/blog').BlogRepository(bbDb, blogConnection);
+    blog = require('./repositories/blog').BlogRepository(lxDb, blogConnection);
 
 function callback(err, res) {
     'use strict';
@@ -18,10 +18,10 @@ function callback(err, res) {
 
 //blog.posts.getOne({_id:'511106fc574d81d815000001'}, callback);
 //blog.posts.getOneById('511106fc574d81d815000001', callback);
-//blog.posts.getAll({limit: 3}, callback);
+//blog.posts.getAll({limit: 3, sort:-1}, callback);
 //blog.posts.getTitles(callback);
 //blog.posts.getOneById_WR('511106fc574d81d815000001', callback);
-blog.posts.getPostComments_WR('511106fc574d81d815000001', callback);
+//blog.posts.getPostComments_WR('511106fc574d81d815000001', callback);
 
 //blog.tags.getAll(callback);
 //blog.categories.getAll(callback);
@@ -46,20 +46,51 @@ blog.posts.getPostComments_WR('511106fc574d81d815000001', callback);
 //blog.comments.delete({_id:'5116bd049e8bbe2412000001'}, callback);
 //blog.posts.getAll(callback);
 
+//blog.users.getOne({_id:'5110f99045a6b93015000009'}, callback);
 //blog.users.getAll(callback);
 //blog.users.getOne({_id:'5110f99045a6b93015000007'}, callback);
 //blog.users.getOneById('5110f99045a6b93015000007', callback);
-/**
- var user = {
-    'userName': 'diiimo_1',
-    'firstName': 'Timo_1',
+//
+var user = {
+    'userName': 'diiimo_3',
+    'firstName': 'wayne',
     'lastName': 'Liebetrau_1',
     'birthdate': '1973-06-01T15:49:00.000Z',
-    'email': 'diiimo_1@gmail.com'
- };
- **/
+    'email': 'diiimo_3@gmail.com',
+    'prop': 66
+};
+
+var updateUser = {
+    lastName: 'Test',
+    location: {
+        street: 'weg',
+        zip: '12345',
+        cars: [
+            {id: 1, name: 'auto1'},
+            {id: 2, name: 'auto2'}
+        ],
+        door: {
+            hasKey: true,
+            numberOfKeys: 5
+        }
+    }
+};
+
+//blog.users.update({userName: 'diiimo_1'}, user, callback());
+
+//blog.posts.getOne({'comments._id': '5114cefe35b7e4680d000001'}, callback);
+
+//blog.users.getCollection().drop();
+blog.users.getAll(callback);
+
+console.dir(blog.users.getSchema());
+//blog.users.update({userName: 'diiimo_3'}, {'$set': updateUser}, callback);
 //blog.users.delete({userName: user.userName}, callback);
-//blog.users.create(user, callback);
+//blog.users.validate(user, false, blog.users.getSchema(), function(err, res) {
+//    console.dir(res);
+//
+//    blog.users.create(user, callback);
+//});
 //blog.users.update({userName: user.userName},{$set:{firstName: 'Timo_112',lastName: 'Liebetrau:112'}}, callback);
 //blog.users.update({userName:'diiimo_112'},{$set:{firstName:'Timo_112',lastName:'Liebetrau:112'}},callback);
 //blog.users.getOne({userName:'diiimo_112'},callback);
