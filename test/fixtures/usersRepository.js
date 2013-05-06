@@ -3,7 +3,6 @@
 var lxDb = require('../../lib/lx-mongodb');
 
 exports.UserRepository = function (collection) {
-    var val = require('lx-valid');
     var schema = function () {
         return {
             'properties': {
@@ -85,53 +84,6 @@ exports.UserRepository = function (collection) {
                 cb(null, {valid: true});
             }
         });
-    };
-
-    // Todo options: {dataset, schema || schema, isUpdate}
-
-    baseRepo.validate = function (doc, isUpdate, schema, cb) {
-
-        var emailCheck = true;
-        var userNameCheck = true;
-
-        // check is update
-        if (isUpdate) {
-            // Todo Prüfung auf required fields
-            for (var schemaProp in schema.properties) {
-                if (schema.properties.hasOwnProperty(schemaProp)) {
-                    if (!doc.hasOwnProperty(schemaProp)) {
-                        schema.properties[schemaProp].required = false;
-                    }
-                }
-            }
-
-            if (!doc.hasOwnProperty('userName')) {
-                userNameCheck = false;
-            }
-
-            if (!doc.hasOwnProperty('email')) {
-                emailCheck = false;
-            }
-        }
-
-        // json schema validate
-        var valResult = val.validate(doc, schema);
-
-//        // register async validator
-//        if (userNameCheck) {
-//            //noinspection JSUnresolvedVariable
-//            val.asyncValidate.register(baseRepo.checkUserName, doc.userName);
-//        }
-//
-//        // register async validator
-//        if (emailCheck) {
-//            //noinspection JSUnresolvedVariable
-//            val.asyncValidate.register(baseRepo.checkUserEmail, doc.email);
-//        }
-
-        // async validate
-        //noinspection JSUnresolvedVariable
-        val.asyncValidate.exec(valResult, cb);
     };
 
     baseRepo.convert = function (doc) {
