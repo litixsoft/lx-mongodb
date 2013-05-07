@@ -13,7 +13,7 @@ exports.CategoryRepository = function (collection, lxDb) {
                 'catName': {
                     'type': 'string',
                     'required': true,
-                    'sort': true
+                    'sort': 1
                 },
                 'created': {
                     'type': 'string',

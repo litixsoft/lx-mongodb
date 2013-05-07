@@ -13,7 +13,7 @@ exports.TagRepository = function (collection, lxDb) {
                 'tagName': {
                     'type': 'string',
                     'required': true,
-                    'sort': true
+                    'sort': 1
                 }
             }
         },

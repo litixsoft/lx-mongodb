@@ -22,7 +22,7 @@ exports.CommentRepository = function (collection, lxDb) {
                     'type': 'string',
                     'required': true,
                     'format': 'dateTime',
-                    'sort': true
+                    'sort': -1
                 },
                 'subject': {
                     'type': 'string',
