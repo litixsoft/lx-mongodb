@@ -388,7 +388,7 @@ describe('BaseRepo', function () {
                 var id = res[0]._id;
 
                 userRepo.create({userName: 'aaa', chief_id: id}, function () {
-                    userRepo.getAll({chief_id : id.toHexString()}, function (err, res1) {
+                    userRepo.getAll({chief_id: id.toHexString()}, function (err, res1) {
                         expect(Array.isArray(res1)).toBeTruthy();
                         expect(res1.length).toBe(1);
                         expect(res1[0].userName).toBe('aaa');
@@ -591,6 +591,50 @@ describe('BaseRepo', function () {
                         expect(res1.email).toBe('chuck@norris.com');
 
                         done();
+                    });
+                });
+
+            });
+        });
+
+        it('should delete the key of the document on update', function (done) {
+            var user = {
+                firstName: 'Chuck',
+                lastName: 'Norris',
+                userName: 'chuck',
+                email: 'chuck@norris.com',
+                birthdate: '1973-06-01T15:49:00.000Z',
+                age: 44
+            };
+
+            userRepo.create(user, function (err, res) {
+                res[0].userName = 'bob';
+
+                userRepo.update({userName: 'chuck'}, {'$set': res[0]}, function (err, res) {
+                    expect(res).toBeDefined();
+                    expect(res).toBe(1);
+
+                    userRepo.getOne({userName: 'bob'}, function (err, res1) {
+                        expect(res1).toBeDefined();
+                        expect(res1.userName).toBe('bob');
+                        expect(res1.lastName).toBe('Norris');
+                        expect(res1.email).toBe('chuck@norris.com');
+
+                        res1.lastName = 'Wayne';
+
+                        userRepo.update({userName: 'bob'}, res1, function (err, res2) {
+                            expect(res2).toBeDefined();
+                            expect(res2).toBe(1);
+
+                            userRepo.getOne({lastName: 'Wayne'}, function (err, res3) {
+                                expect(res3).toBeDefined();
+                                expect(res3.userName).toBe('bob');
+                                expect(res3.lastName).toBe('Wayne');
+                                expect(res3.email).toBe('chuck@norris.com');
+
+                                done();
+                            });
+                        });
                     });
                 });
 
