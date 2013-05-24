@@ -1,10 +1,7 @@
 module.exports = function (grunt) {
     'use strict';
 
-    var filesToCover = 'lib/**/*.js';
-
     // Project configuration.
-    //noinspection JSUnresolvedFunction,JSUnresolvedVariable
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         banner: '/*!\n' +
@@ -16,12 +13,10 @@ module.exports = function (grunt) {
             ' */\n\n',
         // Before generating any new files, remove any previously-created files.
         clean: {
-            build: ['build']
+            jasmine: ['build/jasmine'],
+            coverage: ['build/coverage']
         },
         jshint: {
-            files: ['Gruntfile.js', 'lib/**/*.js', 'test/**/*.js'],
-            junit: 'build/reports/jshint.xml',
-            checkstyle: 'build/reports/jshint_checkstyle.xml',
             options: {
                 bitwise: true,
                 curly: true,
@@ -36,40 +31,45 @@ module.exports = function (grunt) {
                 regexp: true,
                 undef: true,
                 unused: true,
-                strict: true,
                 indent: 4,
                 quotmark: 'single',
-                es5: true,
                 loopfunc: true,
                 browser: true,
-                node: true
+                node: true,
+                globals: {
+                }
+            },
+            test: ['Gruntfile.js', 'lib/**/.js', 'test/**/*.js'],
+            jslint: {
+                options: {
+                    reporter: 'jslint',
+                    reporterOutput: 'build/reports/jshint.xml'
+                },
+                files: {
+                    src: ['Gruntfile.js', 'lib/**/.js', 'test/**/*.js']
+                }
+            },
+            checkstyle: {
+                options: {
+                    reporter: 'checkstyle',
+                    reporterOutput: 'build/reports/jshint_checkstyle.xml'
+                },
+                files: {
+                    src: ['Gruntfile.js', 'lib/**/.js', 'test/**/*.js']
+                }
             }
         },
-        watch: {
-            files: '<%= jshint.files %>',
-            tasks: ['jshint:files']
-        },
-        // istanbul
-        instrument: {
-            files: filesToCover,
-            options: {
-                basePath: 'build/instrument/'
+        bgShell: {
+            coverage: {
+                cmd: 'node node_modules/istanbul/lib/cli.js cover --dir build/coverage node_modules/grunt-jasmine-node/node_modules/jasmine-node/bin/jasmine-node -- test --forceexit'
+            },
+            cobertura: {
+                cmd: 'node node_modules/istanbul/lib/cli.js report --root build/coverage --dir build/coverage/cobertura cobertura'
             }
         },
-        reloadTasks: {
-            rootPath: 'build/instrument/lib'
-        },
-        storeCoverage: {
-            options: {
-                dir: 'build/reports/code_coverage'
-            }
-        },
-        makeReport: {
-            src: 'build/reports/code_coverage/**/*.json',
-            options: {
-                type: 'cobertura',
-                dir: 'build/reports/code_coverage',
-                print: 'detail'
+        open: {
+            file: {
+                path: 'build/coverage/lcov-report/index.html'
             }
         },
         jasmine_node: {
@@ -88,17 +88,16 @@ module.exports = function (grunt) {
 
     // Load tasks.
     grunt.loadNpmTasks('grunt-contrib-jshint');
-    grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-jasmine-node');
     grunt.loadNpmTasks('grunt-contrib-clean');
-    grunt.loadNpmTasks('grunt-istanbul');
+    grunt.loadNpmTasks('grunt-bg-shell');
+    grunt.loadNpmTasks('grunt-open');
 
-    // Test task.
-    grunt.registerTask('test', ['clean', 'jshint:files', 'jasmine_node']);
+    // Register tasks.
+    grunt.registerTask('test', ['clean:jasmine', 'jshint:test', 'jasmine_node']);
+    grunt.registerTask('cover', ['clean:coverage', 'jshint:test', 'bgShell:coverage', 'open']);
+    grunt.registerTask('ci', ['clean', 'jshint:jslint', 'jshint:checkstyle', 'bgShell:coverage', 'bgShell:cobertura']);
 
     // Default task.
     grunt.registerTask('default', ['test']);
-
-    // CI task.
-    grunt.registerTask('cover', ['clean', 'jshint:files', 'instrument', 'reloadTasks', 'jasmine_node', 'storeCoverage', 'makeReport']);
 };

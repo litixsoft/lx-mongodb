@@ -10,7 +10,7 @@ var userRepo = require('./fixtures/usersRepository').UserRepository(sut.GetDb(co
 beforeEach(function () {
     // clear db
     var db = sut.GetDb(connectionString, ['users', 'posts', 'tags', 'categories', 'comments']);
-    db.users.drop();
+    db.users.drop(function () {});
 
     user = {
         firstName: 'Chuck',
@@ -165,7 +165,6 @@ describe('BaseRepo', function () {
                 expect(result[0].userName).toBe('chuck');
                 expect(result[0].email).toBe('chuck@norris.com');
                 expect(result[0].birthdate instanceof Date).toBeTruthy();
-
                 done();
             });
         });
@@ -178,7 +177,7 @@ describe('BaseRepo', function () {
             var func2 = function () { return repo.create(null, 1, 2); };
             var func3 = function () { return repo.create(null, null); };
             var func4 = function () { return repo.create({}, null); };
-            var func5 = function () { return repo.create(null, function () {}); };
+            var func5 = function () { return repo.create(undefined, function () {}); };
 
             expect(func1).toThrow();
             expect(func2).toThrow();
