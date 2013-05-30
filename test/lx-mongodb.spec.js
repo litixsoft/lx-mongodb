@@ -693,7 +693,7 @@ describe('BaseRepo', function () {
                         repo.getCount(function (err, res1) {
                             expect(res1).toBe(1);
 
-                            repo.delete({userName: 'wayne'}, true, function (err, res2) {
+                            repo.delete({userName: 'wayne'}, function (err, res2) {
                                 expect(res2).toBeDefined();
                                 expect(res2).toBe(1);
 
@@ -709,6 +709,24 @@ describe('BaseRepo', function () {
             });
         });
 
+        it('should remove nothing when the id is of wrong type', function (done) {
+            userRepo.create(user, function () {
+                userRepo.create({userName: 'wayne'}, function () {
+                    userRepo.delete({_id: null}, function (err, res) {
+                        expect(res).toBeDefined();
+                        expect(res).toBe(0);
+
+                        userRepo.delete({_id: undefined}, function (err, res) {
+                            expect(res).toBeDefined();
+                            expect(res).toBe(0);
+
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
         it('should remove multiple documents of the collection', function (done) {
             var db = sut.GetDb(connectionString);
             var repo = sut.BaseRepo(db.users);
@@ -718,7 +736,7 @@ describe('BaseRepo', function () {
                     repo.getCount(function (err, res) {
                         expect(res).toBe(2);
 
-                        repo.delete({userName: 'chuck'}, false, function (err, res1) {
+                        repo.delete({userName: 'chuck'}, function (err, res1) {
                             expect(res1).toBe(2);
 
                             repo.getCount(function (err, res2) {
@@ -732,36 +750,21 @@ describe('BaseRepo', function () {
             });
         });
 
-        it('should throw an exception when the number of params is less than 2', function () {
-            var db = sut.GetDb(connectionString);
-            var repo = sut.BaseRepo(db.users);
-
-            var func1 = function () { return repo.delete(1); };
-            var func2 = function () { return repo.delete(); };
-
-            expect(func1).toThrow();
-            expect(func2).toThrow();
-        });
-
         it('should throw an exception when params are of wrong type', function () {
             var db = sut.GetDb(connectionString);
             var repo = sut.BaseRepo(db.users);
 
             var func1 = function () { return repo.delete(1, 2); };
-            var func2 = function () { return repo.delete({}, null); };
-            var func3 = function () { return repo.delete('wayne', function () {}); };
-            var func4 = function () { return repo.delete({}, 1, function () {}); };
-            var func5 = function () { return repo.delete(1, true, function () {}); };
-            var func6 = function () { return repo.delete(1, true, function () {}); };
-            var func7 = function () { return repo.delete({}, true, 1); };
+            var func2 = function () { return repo.delete(null, null); };
+            var func3 = function () { return repo.delete({}, null); };
+            var func4 = function () { return repo.delete('wayne', function () {}); };
+            var func5 = function () { return userRepo.delete({_id: '23422342'}, function () {}); };
 
             expect(func1).toThrow();
             expect(func2).toThrow();
             expect(func3).toThrow();
             expect(func4).toThrow();
             expect(func5).toThrow();
-            expect(func6).toThrow();
-            expect(func7).toThrow();
         });
     });
 });

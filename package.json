@@ -1,7 +1,7 @@
 {
     "name": "lx-mongodb",
     "description": "Litixsoft backend driver for mongoDb.",
-    "version": "0.2.4",
+    "version": "0.2.5",
     "homepage": "https://github.com/litixsoft/lx-mongodb",
     "author": {
         "name": "Litixsoft GmbH",
@@ -72,8 +72,8 @@
         "istanbul": "~0.1.35"
     },
     "dependencies": {
-        "mongodb": "~1.3.1",
-        "mongojs": "~0.7.4",
-        "async": "~0.2.8"
+        "mongodb": "~1.3.7",
+        "mongojs": "~0.7.5",
+        "async": "~0.2.9"
     }
 }

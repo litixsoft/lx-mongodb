@@ -26,6 +26,11 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 ## Release History
 
+### v0.2.5
+* refactor baseRepo.delete()
+* update tests
+* change deprecated mongo option {safe: true} to {w: 1}
+
 ### v0.2.4
 * callback with TypeError in getById() when id is null or undefined
 
