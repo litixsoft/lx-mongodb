@@ -491,13 +491,28 @@ describe('BaseRepo', function () {
             });
         });
 
-        it('should return no document when the query not matches any document of the collection', function (done) {
+        it('should return no document when the id not matches any document of the collection', function (done) {
             var db = sut.GetDb(connectionString);
             var repo = sut.BaseRepo(db.users);
 
             repo.getOneById('5108e9333cb086801f000035', function (err, res) {
                 expect(res).toBeDefined();
-                expect(res).toBeNull();
+                expect(res).toBe(null);
+
+                done();
+            });
+        });
+
+        it('should return no document when the id is of wrong type', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.getOneById(123, function (err, res) {
+                expect(err).toBeDefined();
+                expect(err instanceof TypeError).toBeTruthy();
+                expect(err.message).toBe('id must be of type string or object');
+                expect(res).toBeDefined();
+                expect(res).toBe(null);
 
                 done();
             });

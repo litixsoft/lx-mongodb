@@ -26,6 +26,10 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 ## Release History
 
+### v0.2.3
+* change some Errors to TypeErrors
+* callback with TypeError in getById() when id is of wrong type
+
 ### v0.0.1 project initial
 
 ## Roadmap
