@@ -518,6 +518,29 @@ describe('BaseRepo', function () {
             });
         });
 
+        it('should return no document when the id undefined or null', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.getOneById(null, function (err, res) {
+                expect(err).toBeDefined();
+                expect(err instanceof TypeError).toBeTruthy();
+                expect(err.message).toBe('id must be of type string or object');
+                expect(res).toBeDefined();
+                expect(res).toBe(null);
+
+                repo.getOneById(undefined, function (err, res) {
+                    expect(err).toBeDefined();
+                    expect(err instanceof TypeError).toBeTruthy();
+                    expect(err.message).toBe('id must be of type string or object');
+                    expect(res).toBeDefined();
+                    expect(res).toBe(null);
+
+                    done();
+                });
+            });
+        });
+
         it('should throw an exception when the params are of wrong type', function () {
             var db = sut.GetDb(connectionString);
             var repo = sut.BaseRepo(db.users);
