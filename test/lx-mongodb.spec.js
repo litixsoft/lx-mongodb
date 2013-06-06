@@ -7,10 +7,10 @@ var connectionString = 'localhost/blog?w=1&journal=True&fsync=True';
 var user = {};
 var userRepo = require('./fixtures/usersRepository').UserRepository(sut.GetDb(connectionString, ['users', 'posts', 'tags', 'categories', 'comments']).users);
 
-beforeEach(function () {
+beforeEach(function (done) {
     // clear db
     var db = sut.GetDb(connectionString, ['users', 'posts', 'tags', 'categories', 'comments']);
-    db.users.drop(function () {});
+    db.users.drop(function () {done();});
 
     user = {
         firstName: 'Chuck',
@@ -112,29 +112,6 @@ describe('BaseRepo', function () {
         expect(repo.convertId(_id)).toBe(id);
     });
 
-    it('has a function getCount() which should return the number of documents of the collection in the BaseRepo', function (done) {
-        var db = sut.GetDb(connectionString);
-        var repo = sut.BaseRepo(db.users);
-
-        repo.getCount(function (error, result) {
-            expect(result).toBe(0);
-
-            repo.create(user, function () {
-                repo.create({userName: 'wayne'}, function () {
-                    repo.getCount(function (error, result) {
-                        expect(result).toBe(2);
-
-                        repo.getCount({userName: 'wayne'}, function (error, result) {
-                            expect(result).toBe(1);
-
-                            done();
-                        });
-                    });
-                });
-            });
-        });
-    });
-
     it('has a function getSchema() which should return the schema', function () {
         var db = sut.GetDb(connectionString);
         var repo = sut.BaseRepo(db.users);
@@ -150,6 +127,45 @@ describe('BaseRepo', function () {
 
         expect(typeof userSchema2).toBe('object');
         expect(userSchema2.properties.userName.required).toBeTruthy();
+    });
+
+    describe('has a function getCount() which', function () {
+        it('should return the number of documents of the collection in the BaseRepo', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.getCount(function (error, result) {
+                expect(result).toBe(0);
+
+                repo.create(user, function () {
+                    repo.create({userName: 'wayne'}, function () {
+                        repo.getCount(function (error, result) {
+                            expect(result).toBe(2);
+
+                            repo.getCount({userName: 'wayne'}, function (error, result) {
+                                expect(result).toBe(1);
+
+                                done();
+                            });
+                        });
+                    });
+                });
+            });
+        });
+
+        it('should return a error callback when the param "query" is not of type object', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.getCount(123, function (error, result) {
+                expect(result).toBe(null);
+                expect(error).toBeDefined();
+                expect(error instanceof TypeError).toBeTruthy();
+                expect(error.message).toBe('query must be of type object');
+
+                done();
+            });
+        });
     });
 
     describe('has a function create() which', function () {

@@ -26,6 +26,9 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 ## Release History
 
+### v0.2.6
+* refactor some param checks to callback with an TypeError instead of throwing an exception
+
 ### v0.2.5
 * refactor baseRepo.delete()
 * update tests
