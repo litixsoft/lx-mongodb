@@ -26,6 +26,11 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 ## Release History
 
+### v0.3.0
+* update lx-helpers
+* refactor to take advantage of the new type checking in lxHelpers
+* refactor sort option, it can be now a string, array or object
+
 ### v0.2.6
 * refactor some param checks to callback with an TypeError instead of throwing an exception
 
