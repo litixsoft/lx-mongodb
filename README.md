@@ -26,6 +26,9 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 ## Release History
 
+### v0.3.2
+* fix error in function create(), now also arrays can be passed as doc
+
 ### v0.3.1
 * fix error in function convertToMongoId(), $in array with mongoId's was not identified correctly
 

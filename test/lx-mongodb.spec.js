@@ -208,7 +208,26 @@ describe('BaseRepo', function () {
             });
         });
 
-        it('should return an error callback when the param "doc" is not of type object', function (done) {
+        it('should insert an array with new documents in the collection', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+            var doc = [user, {userName: 'test'}, {lastName: 'wayne'}];
+
+            repo.create(doc, function (error, result) {
+                expect(result).toBeDefined();
+                expect(Array.isArray(result)).toBeTruthy();
+                expect(result.length).toBe(3);
+                expect(result[0].firstName).toBe('Chuck');
+                expect(result[0].lastName).toBe('Norris');
+                expect(result[0].userName).toBe('chuck');
+                expect(result[0].email).toBe('chuck@norris.com');
+                expect(result[0].birthdate instanceof Date).toBeTruthy();
+
+                done();
+            });
+        });
+
+        it('should return an error callback when the param "doc" is not of type object or array', function (done) {
             var db = sut.GetDb(connectionString);
             var repo = sut.BaseRepo(db.users);
 
@@ -216,7 +235,7 @@ describe('BaseRepo', function () {
                 expect(result).toBeNull();
                 expect(error).toBeDefined();
                 expect(error instanceof TypeError).toBeTruthy();
-                expect(error.message).toBe('Param "doc" is of type [object Number]! Type [object Object] expected');
+                expect(error.message).toBe('Param "doc" is of type [object Number]! Type [object Object] or [object Array] expected');
 
                 done();
             });
