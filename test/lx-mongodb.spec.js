@@ -302,13 +302,35 @@ describe('BaseRepo', function () {
             });
         });
 
-        it('should get all documents of the collection and convert $in query with ids', function (done) {
+        it('should get all documents of the collection and convert $in in query with ids', function (done) {
             var ids = [];
 
             userRepo.create(user, function (err, res) {
                 ids.push(res[0]._id.toString());
                 userRepo.create({userName: 'wayne'}, function (err, res) {
                     ids.push(res[0]._id.toString());
+                    userRepo.create({userName: 'who'}, function () {
+                        userRepo.getAll({_id: {$in: ids}}, function (err, res) {
+                            expect(err).toBeNull();
+                            expect(Array.isArray(res)).toBeTruthy();
+                            expect(res.length).toBe(2);
+                            expect(res[0].userName).toBe('chuck');
+                            expect(res[1].userName).toBe('wayne');
+
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('should get all documents of the collection and not convert $in in query with ids when ids are already mongo-ids', function (done) {
+            var ids = [];
+
+            userRepo.create(user, function (err, res) {
+                ids.push(res[0]._id);
+                userRepo.create({userName: 'wayne'}, function (err, res) {
+                    ids.push(res[0]._id);
                     userRepo.create({userName: 'who'}, function () {
                         userRepo.getAll({_id: {$in: ids}}, function (err, res) {
                             expect(err).toBeNull();

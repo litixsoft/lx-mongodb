@@ -26,6 +26,9 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 ## Release History
 
+### v0.3.1
+* fix error in function convertToMongoId(), $in array with mongoId's was not identified correctly
+
 ### v0.3.0
 * update lx-helpers
 * refactor to take advantage of the new type checking in lxHelpers
