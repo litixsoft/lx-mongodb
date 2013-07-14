@@ -2,24 +2,14 @@
 
 Litixsoft backend driver for mongoDb based on mongojs.
 
-_(Coming soon)_
-
-## Getting Started
-
-### Install:
+## Install:
 
 ```javascript
 npm install lx-mongodb
 ```
 
-### Usage
-_(Coming soon)_
-
 ## Documentation
-_(Coming soon)_
-
-## Examples
-_(Coming soon)_
+[http://www.litixsoft.de/products-lxmongodb](http://www.litixsoft.de/products-lxmongodb) (german)
 
 ## Contributing
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [grunt](http://gruntjs.com/).
@@ -57,6 +47,9 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 ## Roadmap
 
 ### v0.1.0 first stable version
+
+## Author
+[Litixsoft GmbH](http://www.litixsoft.de)
 
 ## License
 Copyright (C) 2013 Litixsoft GmbH <info@litixsoft.de>
