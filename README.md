@@ -16,6 +16,9 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 ## Release History
 
+### v0.3.3
+* gridFs implemented with mongojs
+
 ### v0.3.2
 * fix error in function create(), now also arrays can be passed as doc
 
