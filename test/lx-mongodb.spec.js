@@ -5,12 +5,12 @@ var ObjectID = require('mongodb').ObjectID;
 var sut = require('../lib/lx-mongodb.js');
 var connectionString = 'localhost/blog?w=1&journal=True&fsync=True';
 var user = {};
-var userRepo = require('./fixtures/usersRepository').UserRepository(sut.GetDb(connectionString, ['users', 'posts', 'tags', 'categories', 'comments']).users);
+var userRepo = require('./fixtures/usersRepository').UserRepository(sut.GetDb(connectionString, ['users', 'posts', 'tags', 'categories', 'comments'], ['documents']).users);
 var lxHelpers = require('lx-helpers');
 
 beforeEach(function (done) {
     // clear db
-    var db = sut.GetDb(connectionString, ['users', 'posts', 'tags', 'categories', 'comments']);
+    var db = sut.GetDb(connectionString, ['users', 'posts', 'tags', 'categories', 'comments'], ['documents']);
     db.users.drop(function () {done();});
 
     user = {
@@ -34,6 +34,7 @@ describe('lx-mongodb', function () {
             var func6 = function () { return sut.GetDb(true); };
             var func7 = function () { return sut.GetDb(function () {}); };
             var func8 = function () { return sut.GetDb(connectionString, ''); };
+            var func9 = function () { return sut.GetDb(connectionString, '', ''); };
 
             expect(func1).toThrow();
             expect(func2).toThrow();
@@ -43,10 +44,11 @@ describe('lx-mongodb', function () {
             expect(func6).toThrow();
             expect(func7).toThrow();
             expect(func8).toThrow();
+            expect(func9).toThrow();
         });
 
         it('should return the db with the given collections', function () {
-            var db = sut.GetDb(connectionString, ['users', 'posts', 'tags', 'categories', 'comments']);
+            var db = sut.GetDb(connectionString, ['users', 'posts', 'tags', 'categories', 'comments'], ['documents']);
 
             expect(db).toBeDefined();
             expect(typeof db).toBe('object');
@@ -67,6 +69,16 @@ describe('lx-mongodb', function () {
 
             expect(db).toBeDefined();
             expect(typeof db).toBe('object');
+        });
+
+        it('should return the db with the given gridFs collections', function () {
+            var db = sut.GetDb(connectionString);
+            var documents = db.documents;
+
+            documents.getGridFs(function (error, gridFs) {
+                expect(gridFs).toBeDefined();
+                expect(typeof gridFs).toBe('object');
+            });
         });
     });
 });
