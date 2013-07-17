@@ -215,20 +215,37 @@ userRepo.validate({userName: 'Wayne', age: 99}, function(err, res) {
 ```
 
 ## API
-### Db connection
+### DB connection
 #### getDb(connectionString, collections, gridFsCollections)
 Creates a connection to the mongoDb using a connection string. The db and the connections are stored in memory.
+
+Note: When querying the gridFsCollections, you need to add them to the collections array. See examples.
 
 __Arguments__
 
 * `{!string}` __connectionString__ - The connection string.
-* collections(item, callback) - A function to apply to each item in the array.
-  The iterator is passed a callback(err) which must be called once it has
-  completed. If no error has occured, the callback should be run without
-  arguments or with an explicit null argument.
-* gridFsCollections(err) - A callback which is called after all the iterator functions
-  have finished, or an error has occurred.
+* `{!Array.<string>}` __collections__ - The names of the mongo collections.
+* `{!Array.<string>}` __gridFsCollections__ - The names of the gridfs collections.
 
+__Examples__
+
+```js
+var lxDb = require('lx-mongodb'),
+    db = lxDb.GetDb('localhost:27017/blog?w=0&journal=True&fsync=True', ['posts', 'tags', 'comments']);
+```
+
+```js
+var lxDb = require('lx-mongodb'),
+    db = lxDb.GetDb('localhost:27017/blog?w=0&journal=True&fsync=True', ['posts', 'tags', 'comments'], ['documents']);
+```
+
+```js
+var lxDb = require('lx-mongodb'),
+    db = lxDb.GetDb('localhost:27017/blog?w=0&journal=True&fsync=True', ['posts', 'tags', 'comments', 'documents.files'], ['documents']);
+```
+
+
+---
 
 ## Contributing
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [grunt](http://gruntjs.com/).
