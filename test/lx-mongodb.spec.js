@@ -5,12 +5,12 @@ var ObjectID = require('mongodb').ObjectID;
 var sut = require('../lib/lx-mongodb.js');
 var connectionString = 'localhost/blog?w=1&journal=True&fsync=True';
 var user = {};
-var userRepo = require('./fixtures/usersRepository').UserRepository(sut.GetDb(connectionString, ['users', 'posts', 'tags', 'categories', 'comments'], ['documents']).users);
+var userRepo = require('./fixtures/usersRepository').UserRepository(sut.GetDb(connectionString, ['users', 'posts', 'tags', 'categories', 'comments', 'documents.files'], ['documents']).users);
 var lxHelpers = require('lx-helpers');
 
 beforeEach(function (done) {
     // clear db
-    var db = sut.GetDb(connectionString, ['users', 'posts', 'tags', 'categories', 'comments'], ['documents']);
+    var db = sut.GetDb(connectionString, ['users', 'posts', 'tags', 'categories', 'comments', 'documents.files'], ['documents']);
     db.users.drop(function () {done();});
 
     user = {
@@ -48,7 +48,7 @@ describe('lx-mongodb', function () {
         });
 
         it('should return the db with the given collections', function () {
-            var db = sut.GetDb(connectionString, ['users', 'posts', 'tags', 'categories', 'comments'], ['documents']);
+            var db = sut.GetDb(connectionString, ['users', 'posts', 'tags', 'categories', 'comments', 'documents.files'], ['documents']);
 
             expect(db).toBeDefined();
             expect(typeof db).toBe('object');
@@ -1133,3 +1133,70 @@ describe('BaseRepo', function () {
     });
 });
 
+describe('GridFsBaseRepo', function () {
+    it('should throw an exception when parameter "collection" is empty', function () {
+        var func1 = function () { return sut.GridFsBaseRepo(null); };
+        var func2 = function () { return sut.GridFsBaseRepo(undefined); };
+        var func3 = function () { return sut.GridFsBaseRepo(false); };
+        var func4 = function () { return sut.GridFsBaseRepo(); };
+
+        expect(func1).toThrow();
+        expect(func2).toThrow();
+        expect(func3).toThrow();
+        expect(func4).toThrow();
+    });
+
+    it('has a function getCollection() which should return the collection', function () {
+        var db = sut.GetDb(connectionString);
+        var repo = sut.GridFsBaseRepo(db.documents);
+
+        expect(typeof repo.getCollection()).toBe('object');
+    });
+
+    describe('has functions put(), get() and delete() which', function () {
+        it('should store a buffer, finding it and deleting it', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.GridFsBaseRepo(db.documents);
+            var repo2 = sut.BaseRepo(db['documents.files']);
+            var buffer = 'Hello wörld^1';
+            var id;
+
+            expect(repo2).toBeDefined();
+
+            // save
+            repo.put(new Buffer(buffer), {metadata: {'type': 'string'}}, function (error, result) {
+                expect(error).toBe(null);
+                expect(result).toBeDefined();
+                expect(result._id).toBeDefined();
+                expect(result._id instanceof ObjectID).toBeTruthy();
+                id = result._id;
+
+                // get
+                repo.get(id, function (error, data) {
+                    expect(error).toBe(null);
+                    expect(data).toBeDefined();
+
+                    // use getCount in documents repo
+                    repo2.getCount({'metadata.type': 'string'}, function (error, result) {
+                        expect(error).toBe(null);
+                        expect(result).toBe(1);
+
+                        // delete
+                        repo.delete(id, function (error, result2) {
+                            expect(error).toBe(null);
+                            expect(result2).toBeTruthy();
+
+                            // Fetch the content, showing that the file is gone
+                            repo.get(id, function (error, data2) {
+                                expect(error).toBeDefined();
+                                expect(data2).toBe(null);
+
+                                done();
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    });
+});
