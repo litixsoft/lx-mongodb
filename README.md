@@ -4,12 +4,65 @@ Litixsoft backend driver for mongoDb based on mongojs.
 
 ## Install:
 
-```javascript
+```bash
 npm install lx-mongodb
 ```
 
 ## Documentation
 [http://www.litixsoft.de/products-lxmongodb](http://www.litixsoft.de/products-lxmongodb) (german)
+
+### Examples
+#### Simple repository
+
+```bash
+var lxDb = require('lx-mongodb');
+
+exports.UserRepository = function (collection) {
+    var schema = function () {
+            return {
+                'properties': {
+                    '_id': {
+                        'type': 'string',
+                        'required': false,
+                        'format': 'mongo-id',
+                        'key': true
+                    },
+                    'birthdate': {
+                        'type': 'string',
+                        'required': true,
+                        'format': 'date-time'
+                    },
+                    'email': {
+                        'type': 'string',
+                        'required': true,
+                        'format': 'email'
+                    },
+                    'firstName': {
+                        'type': 'string',
+                        'required': true
+                    },
+                    'lastName': {
+                        'type': 'string',
+                        'required': true
+                    },
+                    'userName': {
+                        'type': 'string',
+                        'required': true,
+                        'sort': 1
+                    },
+                    'age': {
+                        'type': 'integer',
+                        'required': false
+                    }
+                }
+            };
+        },
+        baseRepo = lxDb.BaseRepo(collection, schema);
+
+    return baseRepo;
+};
+```
+
 
 ## Contributing
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [grunt](http://gruntjs.com/).
