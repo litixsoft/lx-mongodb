@@ -13,8 +13,8 @@ npm install lx-mongodb
 
 ### Examples
 #### Simple repository
-
-```bash
+##### Define
+```js
 var lxDb = require('lx-mongodb');
 
 exports.UserRepository = function (collection) {
@@ -61,6 +61,23 @@ exports.UserRepository = function (collection) {
 
     return baseRepo;
 };
+```
+
+##### Use
+```js
+var lxDb = require('lx-mongodb'),
+    db = lxDb.GetDb('localhost/blog?w=1&journal=True&fsync=True', ['users']),
+    userRepo = require('./userRepo.js').UserRepository(db.users);
+
+// get all users
+userRepo.getAll(function(err, res) {
+    console.log(res); // array of users
+});
+
+// create new user
+userRepo.create({userName: 'Wayne', age: 99}, function(err, res) {
+    console.log(res); // user object
+});
 ```
 
 
