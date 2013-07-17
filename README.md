@@ -216,6 +216,8 @@ userRepo.validate({userName: 'Wayne', age: 99}, function(err, res) {
 
 ## API
 ### DB connection
+
+<a name="getDb" />
 #### getDb(connectionString, collections, gridFsCollections)
 Creates a connection to the mongoDb using a connection string. The db and the connections are stored in memory.
 
@@ -247,6 +249,8 @@ var lxDb = require('lx-mongodb'),
 ```
 ---
 ### Base repository
+
+<a name="BaseRepository" />
 #### BaseRepository(collection, schema)
 Creates a new repository with the base mongoDb operations. Each mongoDb collection uses the base repository. If you need all the functions of the native mongoDb js driver,
 you can call `getCollection()` on the base repository to get the mongoDb collection.
@@ -264,6 +268,7 @@ var lxDb = require('lx-mongodb'),
     postRepo = lxDb.BaseRepo(db.posts);
 ```
 
+<a name="createNewId" />
 #### createNewId()
 Returns a new mongo ObjectId.
 
@@ -275,6 +280,235 @@ var repo = basreRepo(collection, schema),
 
 _id instanceof ObjectID === true; // true
 ```
+
+<a name="convertId" />
+#### convertId(id)
+Converts a `string` to a mongo `ObjectID` and vice versa.
+
+__Arguments__
+
+* `{Object|string}` __id__ - The id to convert.
+
+__Example__
+
+```js
+var repo = basreRepo(collection, schema),
+    _id = repo.createNewId(),
+    idString = repo.convertId(_id);
+
+typeof idString === 'string'; // true
+```
+
+<a name="create" />
+#### create(doc, callback)
+Creates one or more records in the mongoDb.
+
+__Arguments__
+
+* `{Array|Object}` __doc__ - The data.
+* `{function(err, res)}` __callback__ - The callback function.
+
+__Example__
+
+```js
+var repo = basreRepo(collection, schema);
+
+repo.create({name: 'Litixsoft', city: 'Leipzig'}, function(err, res) {
+    // more logic here
+});
+```
+
+<a name="delete" />
+#### delete(query, callback)
+Deletes one or more records in the mongoDb.
+
+__Arguments__
+
+* `{Object}` __query__ - The query.
+* `{function(err, res)}` __callback__ - The callback function.
+
+__Example__
+
+```js
+var repo = basreRepo(collection, schema);
+
+repo.delete({_id: '5108e9333cb086801f000035'}, function(err, res) {
+    // more logic here
+});
+
+repo.delete({city: 'Berlin'}, function(err, res) {
+    // more logic here
+});
+```
+
+<a name="getAll" />
+#### getAll(query, options, callback)
+Gets the records from the mongoDb.
+
+__Arguments__
+
+* `{Object=}` __query__ - The query.
+* `{Object=}` __options__ - The mongoDb query options.
+* `{(Array|Object)=}` __options.fields__ - The fields which should be returned by the query.
+* `{Number=}` __options.limit__ - The number of records which should be returned by the query.
+* `{Number=}` __options.skip__ - The number of records which should be skipped by the query.
+* `{(Array|String|Object)=}` __options.sort__ - The sorting of the returned records.
+* `{function(err, res)}` __callback__ - The callback function.
+
+__Example__
+
+```js
+var repo = basreRepo(collection, schema);
+
+repo.getAll({}, function(err, res) {
+    // more logic here
+});
+
+repo.getAll({name: 'Litixsoft'}, {skip: 0, limit: 10, sort: {name: 1}, fields: ['name', 'city']}, function(err, res) {
+    // more logic here
+});
+```
+
+<a name="getCollection" />
+#### getCollection()
+Returns the mongoDb collection object.
+
+__Example__
+
+```js
+var repo = basreRepo(collection, schema),
+    myCollection = repo.getCollection();
+
+collection == myCollection; // true
+```
+
+<a name="getCount" />
+#### getCount(query, callback)
+Returns the number of records.
+
+__Arguments__
+
+* `{Object}` __query__ - The query.
+* `{function(err, res)}` __callback__ - The callback function.
+
+__Example__
+
+```js
+var repo = basreRepo(collection, schema);
+
+repo.getCount({}, function(err, res) {
+    // more logic here
+});
+```
+
+<a name="getOne" />
+#### getOne(query, options, callback)
+Gets one record from the mongoDb.
+
+__Arguments__
+
+* `{Object=}` __query__ - The query.
+* `{Object=}` __options__ - The mongoDb query options.
+* `{(Array|Object)=}` __options.fields__ - The fields which should be returned by the query.
+* `{Number=}` __options.limit__ - The number of records which should be returned by the query.
+* `{Number=}` __options.skip__ - The number of records which should be skipped by the query.
+* `{(Array|String|Object)=}` __options.sort__ - The sorting of the returned records.
+* `{function(err, res)}` __callback__ - The callback function.
+
+__Example__
+
+```js
+var repo = basreRepo(collection, schema);
+
+repo.getOne({name: 'Litixsoft'}, function(err, res) {
+    // more logic here
+});
+
+repo.getOne({name: 'Litixsoft'}, {skip: 0, limit: 10, sort: {name: 1}, fields: ['name', 'city']}, function(err, res) {
+    // more logic here
+});
+```
+
+<a name="getOneById" />
+#### getOneById(id, options, callback)
+Gets one record by id from the mongoDb.
+
+__Arguments__
+
+* `{Object|string}` __id__ - The id.
+* `{Object=}` __options__ - The mongoDb query options.
+* `{(Array|Object)=}` __options.fields__ - The fields which should be returned by the query.
+* `{function(err, res)}` __callback__ - The callback function.
+
+__Example__
+
+```js
+var repo = basreRepo(collection, schema),
+    myId = repo.convertId('5108e9333cb086801f000035');
+
+repo.getOneById('5108e9333cb086801f000035', function(err, res) {
+    // more logic here
+});
+
+repo.getOneById(myId, {fields: ['name', 'city']}, function(err, res) {
+    // more logic here
+});
+```
+
+<a name="getSchema" />
+#### getSchema()
+Returns the JSON schema.
+
+__Example__
+
+```js
+var repo = basreRepo(collection, schema),
+    mySchema = repo.getSchema();
+
+schema == mySchema; // true
+```
+
+<a name="getValidationOptions" />
+#### getValidationOptions()
+Returns an object with the validation options. This is especially useful in combination with [lx-valid](https://github.com/litixsoft/lx-valid).
+The method `convert()` can also be used by other schema validators.
+
+__Example__
+
+```js
+var repo = basreRepo(collection, schema),
+    options = repo.getValidationOptions();
+
+options.deleteUnknownProperties === true; // true
+typeof options.convert === 'function'; // true
+```
+
+<a name="update" />
+#### update(query, update, callback)
+Updates one or more records in the mongoDb.
+
+__Arguments__
+
+* `{Object}` __query__ - The query.
+* `{Object}` __update__ - The data to update.
+* `{function(err, res)}` __callback__ - The callback function.
+
+__Example__
+
+```js
+var repo = basreRepo(collection, schema);
+
+repo.update({_id: '5108e9333cb086801f000035'}, {name: 'Litixsoft GmbH'}, function(err, res) {
+    // weitere Logik
+});
+
+repo.update({_id: '5108e9333cb086801f000035'}, {$set: {name: 'Litixsoft GmbH', city: 'Palo Alto'}}, function(err, res) {
+    // weitere Logik
+});
+```
+
+---
+### GridFs base repository
 
 
 
