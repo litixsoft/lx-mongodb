@@ -1,5 +1,7 @@
 .git*
-example/
-test/
+.idea
 .travis.yml
+/build
+example/
 Gruntfile.js
+test/
