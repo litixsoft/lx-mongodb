@@ -15,6 +15,8 @@ npm install lx-mongodb
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [grunt](http://gruntjs.com/).
 
 ## Release History
+### v0.3.4
+* add gridFs error handling
 
 ### v0.3.3
 * gridFs implemented with mongojs
