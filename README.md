@@ -219,13 +219,13 @@ userRepo.validate({userName: 'Wayne', age: 99}, function(err, res) {
 #### getDb(connectionString, collections, gridFsCollections)
 Creates a connection to the mongoDb using a connection string. The db and the connections are stored in memory.
 
-Note: When querying the gridFsCollections, you need to add them to the collections array. See examples.
+Note: When querying the metadata of gridFsCollections, you need to add them to the collections array. See examples.
 
 __Arguments__
 
 * `{!string}` __connectionString__ - The connection string.
 * `{!Array.<string>}` __collections__ - The names of the mongo collections.
-* `{!Array.<string>}` __gridFsCollections__ - The names of the gridfs collections.
+* `{Array.<string>=}` __gridFsCollections__ - The names of the gridfs collections.
 
 __Examples__
 
@@ -235,17 +235,48 @@ var lxDb = require('lx-mongodb'),
 ```
 
 ```js
+// with gridfs collections
 var lxDb = require('lx-mongodb'),
     db = lxDb.GetDb('localhost:27017/blog?w=0&journal=True&fsync=True', ['posts', 'tags', 'comments'], ['documents']);
 ```
 
 ```js
+// with gridfs collections and collection for querying the gridfs metadata
 var lxDb = require('lx-mongodb'),
-    db = lxDb.GetDb('localhost:27017/blog?w=0&journal=True&fsync=True', ['posts', 'tags', 'comments', 'documents.files'], ['documents']);
+    db = lxDb.GetDb('localhost:27017/blog?w=0&journal=True&fsync=True', ['posts', 'tags', 'comments', 'documents.files', 'pdf.files'], ['documents', 'pdf']);
+```
+---
+### Base repository
+#### BaseRepository(collection, schema)
+Creates a new repository with the base mongoDb operations. Each mongoDb collection uses the base repository. If you need all the functions of the native mongoDb js driver,
+you can call `getCollection()` on the base repository to get the mongoDb collection.
+
+__Arguments__
+
+* `{!Object}` __collection__ - The mongoDb colllection.
+* `{(Object|Function)=}` __schema__ - The JSON schema. Is used to get the id field and the default sorting.
+
+__Example__
+
+```js
+var lxDb = require('lx-mongodb'),
+    db = lxDb.GetDb('localhost:27017/blog?w=0&journal=True&fsync=True', ['posts', 'tags', 'comments']),
+    postRepo = lxDb.BaseRepo(db.posts);
+```
+
+#### createNewId()
+Returns a new mongo ObjectId.
+
+__Example__
+
+```js
+var repo = basreRepo(collection, schema),
+    _id = repo.createNewId();
+
+_id instanceof ObjectID === true; // true
 ```
 
 
----
 
 ## Contributing
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [grunt](http://gruntjs.com/).
