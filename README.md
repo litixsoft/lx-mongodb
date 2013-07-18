@@ -202,11 +202,11 @@ userRepo.validate({userName: 'Wayne', age: 99}, function(err, res) {
 ### Gridfs base repository
 
 * [GridFsBaseRepo](#GridFsBaseRepo)
-* [convertId](#convertId)
-* [delete](#delete)
+* [convertId](#convertId1)
+* [delete](#delete1)
 * [get](#get)
-* [getCollection](#getCollection)
-* [getValidationOptions](#getValidationOptions)
+* [getCollection](#getCollection1)
+* [getValidationOptions](#getValidationOptions1)
 * [put](#put)
 
 ### Database connection
@@ -503,7 +503,7 @@ var lxDb = require('lx-mongodb'),
 ```
 --
 
-<a name="convertId" />
+<a name="convertId1" />
 #### convertId(id)
 Converts a `string` to a mongo `ObjectID` and vice versa.
 
@@ -520,7 +520,7 @@ typeof idString === 'string'; // true
 ```
 --
 
-<a name="delete" />
+<a name="delete1" />
 #### delete(id, callback)
 Deletes a file from the collection.
 
@@ -530,7 +530,7 @@ __Arguments__
 * __callback__ `{function(err, res)}` - The callback function.
 
 ```js
-var repo = GridFsBaseRepo(collection, schema);
+var repo = GridFsBaseRepo(collection);
 
 repo.delete('5108e9333cb086801f000035', function(err, res) {
     // more logic here
@@ -548,7 +548,7 @@ __Arguments__
 * __callback__ `{function(err, res)}` - The callback function.
 
 ```js
-var repo = GridFsBaseRepo(collection, schema);
+var repo = GridFsBaseRepo(collection);
 
 repo.get('5108e9333cb086801f000035', function(err, res) {
     // more logic here
@@ -556,7 +556,7 @@ repo.get('5108e9333cb086801f000035', function(err, res) {
 ```
 --
 
-<a name="getCollection" />
+<a name="getCollection1" />
 #### getCollection()
 Returns the mongoDb gridfs collection object.
 
@@ -568,7 +568,7 @@ collection == myCollection; // true
 ```
 --
 
-<a name="getValidationOptions" />
+<a name="getValidationOptions1" />
 #### getValidationOptions()
 Returns an object with the validation options. This is especially useful in combination with [lx-valid](https://github.com/litixsoft/lx-valid).
 The method `convert()` can also be used by other schema validators.
@@ -593,7 +593,7 @@ __Arguments__
 * __callback__ `{function(err, res)}` - The callback function.
 
 ```js
-var repo = GridFsBaseRepo(collection, schema);
+var repo = GridFsBaseRepo(collection);
 
 repo.put(new Buffer('Litixsoft'), {metadata: {'type': 'string'}}, function(err, res) {
     // more logic here
