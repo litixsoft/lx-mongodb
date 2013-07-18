@@ -13,46 +13,28 @@ npm install lx-mongodb
 
 ## Examples
 ### Simple repository
-#### Declare
 ```js
 var lxDb = require('lx-mongodb');
 
 exports.UserRepository = function (collection) {
     var schema = function () {
             return {
-                'properties': {
-                    '_id': {
-                        'type': 'string',
-                        'required': false,
-                        'format': 'mongo-id',
-                        'key': true
+                properties: {
+                    _id: {
+                        type: 'string',
+                        required: false,
+                        format: 'mongo-id',
+                        key: true
                     },
-                    'birthdate': {
-                        'type': 'string',
-                        'required': true,
-                        'format': 'date-time'
+                    email: {
+                        type: 'string',
+                        required: true,
+                        format: 'email'
                     },
-                    'email': {
-                        'type': 'string',
-                        'required': true,
-                        'format': 'email'
-                    },
-                    'firstName': {
-                        'type': 'string',
-                        'required': true
-                    },
-                    'lastName': {
-                        'type': 'string',
-                        'required': true
-                    },
-                    'userName': {
-                        'type': 'string',
-                        'required': true,
-                        'sort': 1
-                    },
-                    'age': {
-                        'type': 'integer',
-                        'required': false
+                    userName: {
+                        type: 'string',
+                        required: true,
+                        sort: 1
                     }
                 }
             };
@@ -62,8 +44,6 @@ exports.UserRepository = function (collection) {
     return baseRepo;
 };
 ```
-
-#### Use
 ```js
 var lxDb = require('lx-mongodb'),
     db = lxDb.GetDb('localhost/blog?w=1&journal=True&fsync=True', ['users']),
@@ -81,47 +61,34 @@ userRepo.create({userName: 'Wayne', age: 99}, function(err, res) {
 ```
 
 ### Repository with validation
-#### Declare
 ```js
 var lxDb = require('lx-mongodb');
 
 exports.UserRepository = function (collection) {
     var schema = function () {
             return {
-                'properties': {
-                    '_id': {
-                        'type': 'string',
-                        'required': false,
-                        'format': 'mongo-id',
-                        'key': true
+                properties: {
+                    _id: {
+                        type: 'string',
+                        required: false,
+                        format: 'mongo-id',
+                        key: true
                     },
-                    'birthdate': {
-                        'type': 'string',
-                        'required': true,
-                        'format': 'date-time'
+                    email: {
+                        type: 'string',
+                        required: true,
+                        format: 'email'
                     },
-                    'email': {
-                        'type': 'string',
-                        'required': true,
-                        'format': 'email'
+                    userName: {
+                        type: 'string',
+                        required: true,
+                        sort: 1
                     },
-                    'firstName': {
-                        'type': 'string',
-                        'required': true
+                    birthdate: {
+                        type: 'string',
+                        required: true,
+                        format: 'date-time'
                     },
-                    'lastName': {
-                        'type': 'string',
-                        'required': true
-                    },
-                    'userName': {
-                        'type': 'string',
-                        'required': true,
-                        'sort': 1
-                    },
-                    'age': {
-                        'type': 'integer',
-                        'required': false
-                    }
                 }
             };
         },
@@ -187,8 +154,6 @@ exports.UserRepository = function (collection) {
     return baseRepo;
 };
 ```
-
-#### Use
 ```js
 var lxDb = require('lx-mongodb'),
     db = lxDb.GetDb('localhost/blog?w=1&journal=True&fsync=True', ['users']),
@@ -215,21 +180,48 @@ userRepo.validate({userName: 'Wayne', age: 99}, function(err, res) {
 ```
 
 ## API
-### DB connection
+### Database connection
+* [getDb](#getDb)
+
+### Base repository
+
+* [BaseRepository](#BaseRepository)
+* [createNewId](#createNewId)
+* [convertId](#convertId)
+* [create](#create)
+* [delete](#BaseRepository)
+* [getAll](#getAll)
+* [getCollection](#getCollection)
+* [getCount](#getCount)
+* [getOne](#getOne)
+* [getOneById](#getOneById)
+* [getSchema](#getSchema)
+* [getValidationOptions](#getValidationOptions)
+* [update](#update)
+
+### Gridfs base repository
+
+* [GridFsBaseRepo](#GridFsBaseRepo)
+* [convertId](#convertId)
+* [delete](#delete)
+* [get](#get)
+* [getCollection](#getCollection)
+* [getValidationOptions](#getValidationOptions)
+* [put](#put)
+
+### Database connection
 
 <a name="getDb" />
 #### getDb(connectionString, collections, gridFsCollections)
 Creates a connection to the mongoDb using a connection string. The db and the connections are stored in memory.
 
-Note: When querying the metadata of gridFsCollections, you need to add them to the collections array. See examples.
+*Note: When querying the metadata of gridFsCollections, you need to add them to the collections array. See examples.*
 
 __Arguments__
 
-* `{!string}` __connectionString__ - The connection string.
-* `{!Array.<string>}` __collections__ - The names of the mongo collections.
-* `{Array.<string>=}` __gridFsCollections__ - The names of the gridfs collections.
-
-__Examples__
+* __connectionString__ `{!string}` - The connection string.
+* __collections__ `{!Array.<string>}` - The names of the mongo collections.
+* __gridFsCollections__ `{Array.<string>=}` - The names of the gridfs collections.
 
 ```js
 var lxDb = require('lx-mongodb'),
@@ -257,22 +249,19 @@ you can call `getCollection()` on the base repository to get the mongoDb collect
 
 __Arguments__
 
-* `{!Object}` __collection__ - The mongoDb colllection.
-* `{(Object|Function)=}` __schema__ - The JSON schema. Is used to get the id field and the default sorting.
-
-__Example__
+* __collection__ `{!Object}` - The mongoDb colllection.
+* __schema__ `{(Object|Function)=}` - The JSON schema. Is used to get the id field and the default sorting.
 
 ```js
 var lxDb = require('lx-mongodb'),
     db = lxDb.GetDb('localhost:27017/blog?w=0&journal=True&fsync=True', ['posts', 'tags', 'comments']),
     postRepo = lxDb.BaseRepo(db.posts);
 ```
+--
 
 <a name="createNewId" />
 #### createNewId()
 Returns a new mongo ObjectId.
-
-__Example__
 
 ```js
 var repo = basreRepo(collection, schema),
@@ -280,6 +269,7 @@ var repo = basreRepo(collection, schema),
 
 _id instanceof ObjectID === true; // true
 ```
+--
 
 <a name="convertId" />
 #### convertId(id)
@@ -287,17 +277,16 @@ Converts a `string` to a mongo `ObjectID` and vice versa.
 
 __Arguments__
 
-* `{Object|string}` __id__ - The id to convert.
-
-__Example__
+* __id__ `{Object|string}` - The id to convert.
 
 ```js
-var repo = basreRepo(collection, schema),
+var repo = BaseRepo(collection, schema),
     _id = repo.createNewId(),
     idString = repo.convertId(_id);
 
 typeof idString === 'string'; // true
 ```
+--
 
 <a name="create" />
 #### create(doc, callback)
@@ -305,18 +294,17 @@ Creates one or more records in the mongoDb.
 
 __Arguments__
 
-* `{Array|Object}` __doc__ - The data.
-* `{function(err, res)}` __callback__ - The callback function.
-
-__Example__
+* __doc__ `{Array|Object}` - The data.
+* __callback__ `{function(err, res)}` - The callback function.
 
 ```js
-var repo = basreRepo(collection, schema);
+var repo = BaseRepo(collection, schema);
 
 repo.create({name: 'Litixsoft', city: 'Leipzig'}, function(err, res) {
     // more logic here
 });
 ```
+--
 
 <a name="delete" />
 #### delete(query, callback)
@@ -324,13 +312,11 @@ Deletes one or more records in the mongoDb.
 
 __Arguments__
 
-* `{Object}` __query__ - The query.
-* `{function(err, res)}` __callback__ - The callback function.
-
-__Example__
+* __query__ `{Object}` - The query.
+* __callback__ `{function(err, res)}` - The callback function.
 
 ```js
-var repo = basreRepo(collection, schema);
+var repo = BaseRepo(collection, schema);
 
 repo.delete({_id: '5108e9333cb086801f000035'}, function(err, res) {
     // more logic here
@@ -340,6 +326,7 @@ repo.delete({city: 'Berlin'}, function(err, res) {
     // more logic here
 });
 ```
+--
 
 <a name="getAll" />
 #### getAll(query, options, callback)
@@ -347,18 +334,16 @@ Gets the records from the mongoDb.
 
 __Arguments__
 
-* `{Object=}` __query__ - The query.
-* `{Object=}` __options__ - The mongoDb query options.
-* `{(Array|Object)=}` __options.fields__ - The fields which should be returned by the query.
-* `{Number=}` __options.limit__ - The number of records which should be returned by the query.
-* `{Number=}` __options.skip__ - The number of records which should be skipped by the query.
-* `{(Array|String|Object)=}` __options.sort__ - The sorting of the returned records.
-* `{function(err, res)}` __callback__ - The callback function.
-
-__Example__
+* __query__ `{Object=}` - The query.
+* __options__ `{Object=}` - The mongoDb query options.
+* __options.fields__ `{(Array|Object)=}` - The fields which should be returned by the query.
+* __options.limit__ `{Number=}` - The number of records which should be returned by the query.
+* __options.skip__ `{Number=}`- The number of records which should be skipped by the query.
+* __options.sort__ `{(Array|String|Object)=}` - The sorting of the returned records.
+* __callback__ `{function(err, res)}` - The callback function.
 
 ```js
-var repo = basreRepo(collection, schema);
+var repo = BaseRepo(collection, schema);
 
 repo.getAll({}, function(err, res) {
     // more logic here
@@ -368,19 +353,19 @@ repo.getAll({name: 'Litixsoft'}, {skip: 0, limit: 10, sort: {name: 1}, fields: [
     // more logic here
 });
 ```
+--
 
 <a name="getCollection" />
 #### getCollection()
 Returns the mongoDb collection object.
 
-__Example__
-
 ```js
-var repo = basreRepo(collection, schema),
+var repo = BaseRepo(collection, schema),
     myCollection = repo.getCollection();
 
 collection == myCollection; // true
 ```
+--
 
 <a name="getCount" />
 #### getCount(query, callback)
@@ -388,18 +373,17 @@ Returns the number of records.
 
 __Arguments__
 
-* `{Object}` __query__ - The query.
-* `{function(err, res)}` __callback__ - The callback function.
-
-__Example__
+* __query__ `{Object}` - The query.
+* __callback__ `{function(err, res)}` - The callback function.
 
 ```js
-var repo = basreRepo(collection, schema);
+var repo = BaseRepo(collection, schema);
 
 repo.getCount({}, function(err, res) {
     // more logic here
 });
 ```
+--
 
 <a name="getOne" />
 #### getOne(query, options, callback)
@@ -407,18 +391,16 @@ Gets one record from the mongoDb.
 
 __Arguments__
 
-* `{Object=}` __query__ - The query.
-* `{Object=}` __options__ - The mongoDb query options.
-* `{(Array|Object)=}` __options.fields__ - The fields which should be returned by the query.
-* `{Number=}` __options.limit__ - The number of records which should be returned by the query.
-* `{Number=}` __options.skip__ - The number of records which should be skipped by the query.
-* `{(Array|String|Object)=}` __options.sort__ - The sorting of the returned records.
-* `{function(err, res)}` __callback__ - The callback function.
-
-__Example__
+* __query__ `{Object=}` - The query.
+* __options__ `{Object=}` - The mongoDb query options.
+* __options.fields__ `{(Array|Object)=}` - The fields which should be returned by the query.
+* __options.limit__ `{Number=}` - The number of records which should be returned by the query.
+* __options.skip__ `{Number=}`- The number of records which should be skipped by the query.
+* __options.sort__ `{(Array|String|Object)=}` - The sorting of the returned records.
+* __callback__ `{function(err, res)}` - The callback function.
 
 ```js
-var repo = basreRepo(collection, schema);
+var repo = BaseRepo(collection, schema);
 
 repo.getOne({name: 'Litixsoft'}, function(err, res) {
     // more logic here
@@ -428,6 +410,7 @@ repo.getOne({name: 'Litixsoft'}, {skip: 0, limit: 10, sort: {name: 1}, fields: [
     // more logic here
 });
 ```
+--
 
 <a name="getOneById" />
 #### getOneById(id, options, callback)
@@ -435,15 +418,13 @@ Gets one record by id from the mongoDb.
 
 __Arguments__
 
-* `{Object|string}` __id__ - The id.
-* `{Object=}` __options__ - The mongoDb query options.
-* `{(Array|Object)=}` __options.fields__ - The fields which should be returned by the query.
-* `{function(err, res)}` __callback__ - The callback function.
-
-__Example__
+* __id__ `{Object|string}` - The id.
+* __options__ `{Object=}` - The mongoDb query options.
+* __options.fields__ `{(Array|Object)=}` - The fields which should be returned by the query.
+* __callback__ `{function(err, res)}` - The callback function.
 
 ```js
-var repo = basreRepo(collection, schema),
+var repo = BaseRepo(collection, schema),
     myId = repo.convertId('5108e9333cb086801f000035');
 
 repo.getOneById('5108e9333cb086801f000035', function(err, res) {
@@ -454,34 +435,33 @@ repo.getOneById(myId, {fields: ['name', 'city']}, function(err, res) {
     // more logic here
 });
 ```
+--
 
 <a name="getSchema" />
 #### getSchema()
 Returns the JSON schema.
 
-__Example__
-
 ```js
-var repo = basreRepo(collection, schema),
+var repo = BaseRepo(collection, schema),
     mySchema = repo.getSchema();
 
 schema == mySchema; // true
 ```
+--
 
 <a name="getValidationOptions" />
 #### getValidationOptions()
 Returns an object with the validation options. This is especially useful in combination with [lx-valid](https://github.com/litixsoft/lx-valid).
 The method `convert()` can also be used by other schema validators.
 
-__Example__
-
 ```js
-var repo = basreRepo(collection, schema),
+var repo = BaseRepo(collection, schema),
     options = repo.getValidationOptions();
 
 options.deleteUnknownProperties === true; // true
 typeof options.convert === 'function'; // true
 ```
+--
 
 <a name="update" />
 #### update(query, update, callback)
@@ -489,43 +469,144 @@ Updates one or more records in the mongoDb.
 
 __Arguments__
 
-* `{Object}` __query__ - The query.
-* `{Object}` __update__ - The data to update.
-* `{function(err, res)}` __callback__ - The callback function.
-
-* __query__ `{Object}` The query.
-* __update__ `{Object}` The data to update.
-* __callback__ `{function(err, res)}` The callback function.
-
-__Example__
+* __query__ `{Object}` - The query.
+* __update__ `{Object}` - The data to update.
+* __callback__ `{function(err, res)}` - The callback function.
 
 ```js
-var repo = basreRepo(collection, schema);
+var repo = BaseRepo(collection, schema);
 
 repo.update({_id: '5108e9333cb086801f000035'}, {name: 'Litixsoft GmbH'}, function(err, res) {
-    // weitere Logik
+    // more logic here
 });
 
 repo.update({_id: '5108e9333cb086801f000035'}, {$set: {name: 'Litixsoft GmbH', city: 'Palo Alto'}}, function(err, res) {
-    // weitere Logik
+    // more logic here
 });
 ```
-
 ---
+
 ### GridFs base repository
 
+<a name="GridFsBaseRepo" />
+#### GridFsBaseRepo(collection)
+Creates a new repository with the base mongoDb gridfs operations.
 
+__Arguments__
+
+* __collection__ `{!Object}` - The mongoDb gridfs colllection.
+
+```js
+var lxDb = require('lx-mongodb'),
+    db = lxDb.GetDb('localhost:27017/blog?w=0&journal=True&fsync=True', ['posts', 'tags', 'comments'], ['documents']),
+    documentsRepo = lxDb.GridFsBaseRepo(db.documents);
+```
+--
+
+<a name="convertId" />
+#### convertId(id)
+Converts a `string` to a mongo `ObjectID` and vice versa.
+
+__Arguments__
+
+* __id__ `{Object|string}` - The id to convert.
+
+```js
+var repo = GridFsBaseRepo(collection),
+    _id = repo.createNewId(),
+    idString = repo.convertId(_id);
+
+typeof idString === 'string'; // true
+```
+--
+
+<a name="delete" />
+#### delete(id, callback)
+Deletes a file from the collection.
+
+__Arguments__
+
+* __id__ `{Object|string}` - The id of the file.
+* __callback__ `{function(err, res)}` - The callback function.
+
+```js
+var repo = GridFsBaseRepo(collection, schema);
+
+repo.delete('5108e9333cb086801f000035', function(err, res) {
+    // more logic here
+});
+```
+--
+
+<a name="get" />
+#### get(id, callback)
+Gets a file from the collection.
+
+__Arguments__
+
+* __id__ `{Object|string}` - The id of the file.
+* __callback__ `{function(err, res)}` - The callback function.
+
+```js
+var repo = GridFsBaseRepo(collection, schema);
+
+repo.get('5108e9333cb086801f000035', function(err, res) {
+    // more logic here
+});
+```
+--
+
+<a name="getCollection" />
+#### getCollection()
+Returns the mongoDb gridfs collection object.
+
+```js
+var repo = GridFsBaseRepo(collection),
+    myCollection = repo.getCollection();
+
+collection == myCollection; // true
+```
+--
+
+<a name="getValidationOptions" />
+#### getValidationOptions()
+Returns an object with the validation options. This is especially useful in combination with [lx-valid](https://github.com/litixsoft/lx-valid).
+The method `convert()` can also be used by other schema validators.
+
+```js
+var repo = GridFsBaseRepo(collection),
+    options = repo.getValidationOptions();
+
+options.deleteUnknownProperties === true; // true
+typeof options.convert === 'function'; // true
+```
+--
+
+<a name="put" />
+#### put(data, options, callback)
+Inserts a file to the collection.
+
+__Arguments__
+
+* __data__ `{Object}` - The buffer with the binary data of the file.
+* __options__ `{Object}` - The options for the file.
+* __callback__ `{function(err, res)}` - The callback function.
+
+```js
+var repo = GridFsBaseRepo(collection, schema);
+
+repo.put(new Buffer('Litixsoft'), {metadata: {'type': 'string'}}, function(err, res) {
+    // more logic here
+});
+```
 
 ## Contributing
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [grunt](http://gruntjs.com/).
 
 ## Release History
-<<<<<<< Updated upstream
-=======
 ### v0.4.0
 * add api documentation
 
->>>>>>> Stashed changes
 ### v0.3.4
 * add gridFs error handling
 
@@ -559,10 +640,6 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 * callback with TypeError in getById() when id is of wrong type
 
 ### v0.0.1 project initial
-
-## Roadmap
-
-### v0.1.0 first stable version
 
 ## Author
 [Litixsoft GmbH](http://www.litixsoft.de)
