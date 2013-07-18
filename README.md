@@ -520,6 +520,12 @@ repo.update({_id: '5108e9333cb086801f000035'}, {$set: {name: 'Litixsoft GmbH', c
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [grunt](http://gruntjs.com/).
 
 ## Release History
+<<<<<<< Updated upstream
+=======
+### v0.4.0
+* add api documentation
+
+>>>>>>> Stashed changes
 ### v0.3.4
 * add gridFs error handling
 
