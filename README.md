@@ -493,12 +493,9 @@ __Arguments__
 * `{Object}` __update__ - The data to update.
 * `{function(err, res)}` __callback__ - The callback function.
 
-<table>
-  <tr><th>Name</th><th>Type</th><th>Description</th></tr>
-  <tr><td>__query__</td><td>`{Object}`</td><td>The query</td></tr>
-  <tr><td>__update__</td><td>`{Object}`</td><td>The data to update</td></tr>
-  <tr><td>__callback__</td><td>`{function(err, res)}`</td><td>The callback function</td></tr>
-</table>
+* __query__ | `{Object}`| - The query.
+* __update__ `{Object}` - The data to update.
+* __callback__ - `{function(err, res)}` - The callback function.
 
 __Example__
 
