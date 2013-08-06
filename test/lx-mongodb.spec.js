@@ -79,10 +79,11 @@ describe('lx-mongodb', function () {
             var db = sut.GetDb(connectionString);
             var documents = db.documents;
 
-            documents.getGridFs(function (error, gridFs) {
-                expect(gridFs).toBeDefined();
-                expect(typeof gridFs).toBe('object');
-            });
+            expect(db).toBeDefined();
+            expect(typeof db).toBe('object');
+
+            expect(documents).toBeDefined();
+            expect(typeof documents).toBe('object');
         });
     });
 });
@@ -1161,14 +1162,14 @@ describe('GridFsBaseRepo', function () {
         it('should store a buffer, finding it and deleting it', function (done) {
             var db = sut.GetDb(connectionString);
             var repo = sut.GridFsBaseRepo(db.documents);
-            var repo2 = sut.BaseRepo(db['documents.files']);
+            var repoFiles = sut.BaseRepo(db.documents.files);
             var buffer = 'Hello wörld^1';
             var id;
 
-            expect(repo2).toBeDefined();
+            expect(repoFiles).toBeDefined();
 
             // save
-            repo.put(new Buffer(buffer), {metadata: {'type': 'string'}}, function (error, result) {
+            repo.put(new Buffer(buffer), {metadata: {'type': 'customer'}}, function (error, result) {
                 expect(error).toBe(null);
                 expect(result).toBeDefined();
                 expect(result._id).toBeDefined();
@@ -1181,7 +1182,7 @@ describe('GridFsBaseRepo', function () {
                     expect(data).toBeDefined();
 
                     // use getCount in documents repo
-                    repo2.getCount({'metadata.type': 'string'}, function (error, result) {
+                    repoFiles.getCount({'metadata.type': 'customer'}, function (error, result) {
                         expect(error).toBe(null);
                         expect(result).toBe(1);
 
