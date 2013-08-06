@@ -12,7 +12,7 @@ beforeEach(function (done) {
     // clear db
     var db = sut.GetDb(connectionString, ['users', 'posts', 'tags', 'categories', 'comments', 'documents.files'], ['documents']);
     db.users.drop(function () {
-        db['documents.files'].drop(function () {
+        db.documents.files.drop(function () {
             done();
         });
     });
