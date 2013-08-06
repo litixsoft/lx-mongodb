@@ -11,7 +11,11 @@ var lxHelpers = require('lx-helpers');
 beforeEach(function (done) {
     // clear db
     var db = sut.GetDb(connectionString, ['users', 'posts', 'tags', 'categories', 'comments', 'documents.files'], ['documents']);
-    db.users.drop(function () {done();});
+    db.users.drop(function () {
+        db['documents.files'].drop(function () {
+            done();
+        });
+    });
 
     user = {
         firstName: 'Chuck',
