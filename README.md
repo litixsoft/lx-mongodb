@@ -491,13 +491,14 @@ typeof options.convert === 'function'; // true
 --
 
 <a name="update" />
-#### update(query, update, callback)
+#### update(query, update, options, callback)
 Updates one or more records in the mongoDb.
 
 __Arguments__
 
 * __query__ `{Object}` - The query.
 * __update__ `{Object}` - The data to update.
+* __options__ `{Object=}` - The options for multi update.
 * __callback__ `{function(err, res)}` - The callback function.
 
 ```js
@@ -508,6 +509,10 @@ repo.update({_id: '5108e9333cb086801f000035'}, {name: 'Litixsoft GmbH'}, functio
 });
 
 repo.update({_id: '5108e9333cb086801f000035'}, {$set: {name: 'Litixsoft GmbH', city: 'Palo Alto'}}, function(err, res) {
+    // more logic here
+});
+
+repo.update({}, {$set: {name: 'Litixsoft GmbH', city: 'Palo Alto'}}, {multi: true}, function(err, res) {
     // more logic here
 });
 ```
@@ -631,6 +636,9 @@ repo.put(new Buffer('Litixsoft'), {metadata: {'type': 'string'}}, function(err, 
 In lieu of a formal styleguide take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [grunt](http://gruntjs.com/).
 
 ## Release History
+### v0.4.3
+* add option for multi update in update function in BaseRepo
+
 ### v0.4.2
 * add function aggregate(pipeline, options, callback) to BaseRepo
 

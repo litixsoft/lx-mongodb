@@ -1001,6 +1001,70 @@ describe('BaseRepo', function () {
             });
         });
 
+        it('should update the document of the collection and has no options as parameter', function (done) {
+            var user = {
+                firstName: 'Chuck',
+                lastName: 'Norris',
+                userName: 'chuck',
+                email: 'chuck@norris.com',
+                birthdate: '1973-06-01T15:49:00.000Z',
+                age: 44
+            };
+
+            userRepo.create(user, function () {
+                userRepo.update({userName: 'chuck'}, {'$set': {userName: 'bob'}}, null, function (err, res) {
+                    expect(res).toBeDefined();
+                    expect(res).toBe(1);
+
+                    userRepo.getOne({userName: 'bob'}, function (err, res1) {
+                        expect(res1).toBeDefined();
+                        expect(res1.userName).toBe('bob');
+                        expect(res1.lastName).toBe('Norris');
+                        expect(res1.email).toBe('chuck@norris.com');
+
+                        done();
+                    });
+                });
+
+            });
+        });
+
+        it('should update all documents of the collection', function (done) {
+            var user1 = {
+                firstName: 'Chuck',
+                lastName: 'Norris',
+                userName: 'chuck'
+            };
+
+            var user2 = {
+                firstName: 'Chuck',
+                lastName: 'Norris',
+                userName: 'chuck'
+            };
+
+            userRepo.create(user1, function () {
+                userRepo.create(user2, function () {
+                    userRepo.getCount({userName: 'chuck'}, function(err, res){
+                        expect(res).toBe(2);
+
+                        userRepo.update({userName: 'chuck'}, {'$set': {userName: 'bob'}}, {multi: true}, function (err, res) {
+                            expect(res).toBeDefined();
+                            expect(res).toBe(2);
+
+                            userRepo.getCount({userName: 'chuck'}, function(err, res){
+                                expect(res).toBe(0);
+                                userRepo.getCount({userName: 'bob'}, function(err, res){
+                                    expect(res).toBe(2);
+
+                                    done();
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
+
         it('should delete the key of the document on update', function (done) {
             var user = {
                 firstName: 'Chuck',
