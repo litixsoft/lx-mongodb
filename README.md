@@ -186,6 +186,7 @@ userRepo.validate({userName: 'Wayne', age: 99}, function(err, res) {
 ### Base repository
 
 * [BaseRepository](#BaseRepository)
+* [aggregate](#aggregate)
 * [createNewId](#createNewId)
 * [convertId](#convertId)
 * [create](#create)
@@ -256,6 +257,32 @@ __Arguments__
 var lxDb = require('lx-mongodb'),
     db = lxDb.GetDb('localhost:27017/blog?w=0&journal=True&fsync=True', ['posts', 'tags', 'comments']),
     postRepo = lxDb.BaseRepo(db.posts);
+```
+--
+
+<a name="aggregate" />
+#### aggregate(pipeline, options, callback)
+Execute an aggregation framework pipeline against the collection, needs MongoDB >= 2.1.
+
+__Arguments__
+
+* __pipeline__ `{!Array}` - The aggregation framework pipeline.
+* __options__ `{Object=}` - The additional options.
+* __callback__ `{function(err, res)}` - The callback function.
+
+```js
+var lxDb = require('lx-mongodb'),
+    db = lxDb.GetDb('localhost:27017/blog?w=0&journal=True&fsync=True', ['users']),
+    repo = lxDb.BaseRepo(db.users),
+    pipeline = [
+        {$project: {age: 1}},
+        {$group: {_id: {age: '$age'}, count: { $sum: 1}}},
+        {$project: {_id: '$_id', age: '$age', count: '$count'}}
+    ];
+
+    repo.aggregate(pipeline, {}, function(error, result) {
+        // more logic here
+    });
 ```
 --
 
@@ -604,6 +631,9 @@ repo.put(new Buffer('Litixsoft'), {metadata: {'type': 'string'}}, function(err, 
 In lieu of a formal styleguide take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [grunt](http://gruntjs.com/).
 
 ## Release History
+### v0.4.2
+* add function aggregate(pipeline, options, callback) to BaseRepo
+
 ### v0.4.1
 * refactored gridFs
 

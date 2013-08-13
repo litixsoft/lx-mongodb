@@ -7,6 +7,26 @@ var connectionString = 'localhost/blog?w=1&journal=True&fsync=True';
 var user = {};
 var userRepo = require('./fixtures/usersRepository').UserRepository(sut.GetDb(connectionString, ['users', 'posts', 'tags', 'categories', 'comments', 'documents.files'], ['documents']).users);
 var lxHelpers = require('lx-helpers');
+var pipeline = [
+    {
+        $project: {
+            age: 1
+        }
+    },
+    {
+        $group: {
+            _id: {age: '$age'},
+            count: { $sum: 1}
+        }
+    },
+    {
+        $project: {
+            _id: '$_id',
+            age: '$age',
+            count: '$count'
+        }
+    }
+];
 
 beforeEach(function (done) {
     // clear db
@@ -1134,6 +1154,97 @@ describe('BaseRepo', function () {
             expect(func2).toThrow();
             expect(func3).toThrow();
             expect(func5).toThrow();
+        });
+    });
+
+    describe('has a function aggregate() which', function () {
+        it('should return an error callback when the param "pipeline" is not of type array', function (done) {
+            userRepo.aggregate('', {}, function (err, res) {
+                expect(err).toBeDefined();
+                expect(err instanceof TypeError).toBeTruthy();
+                expect(err.message).toBe('Param "pipeline" is of type [object String]! Type [object Array] expected');
+                expect(res).toBeNull();
+
+                done();
+            });
+        });
+
+        it('should throw an exception when the number of params is less than 2', function () {
+            var func1 = function () { return userRepo.aggregate(1); };
+
+            expect(func1).toThrow();
+        });
+
+        it('should execute the aggregation pipeline', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.create(user, function () {
+                repo.create({userName: 'wayne', age: 20}, function () {
+                    repo.create({userName: 'hans', age: 30}, function () {
+                        repo.aggregate(pipeline, {}, function (err, res) {
+                            expect(err).toBeNull();
+                            expect(res).toBeDefined();
+                            expect(Array.isArray(res)).toBeTruthy();
+                            expect(res.length).toBe(2);
+                            expect(res).toEqual([
+                                { _id: { age: 30 }, count: 1 },
+                                { _id: { age: 20 }, count: 2 }
+                            ]);
+
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('should execute the aggregation pipeline and set options to empty object when number of params is 2', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.create(user, function () {
+                repo.create({userName: 'wayne', age: 20}, function () {
+                    repo.create({userName: 'hans', age: 30}, function () {
+                        repo.aggregate(pipeline, function (err, res) {
+                            expect(err).toBeNull();
+                            expect(res).toBeDefined();
+                            expect(Array.isArray(res)).toBeTruthy();
+                            expect(res.length).toBe(2);
+                            expect(res).toEqual([
+                                { _id: { age: 30 }, count: 1 },
+                                { _id: { age: 20 }, count: 2 }
+                            ]);
+
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('should execute the aggregation pipeline and set options to empty object when options are empty', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.create(user, function () {
+                repo.create({userName: 'wayne', age: 20}, function () {
+                    repo.create({userName: 'hans', age: 30}, function () {
+                        repo.aggregate(pipeline, null, function (err, res) {
+                            expect(err).toBeNull();
+                            expect(res).toBeDefined();
+                            expect(Array.isArray(res)).toBeTruthy();
+                            expect(res.length).toBe(2);
+                            expect(res).toEqual([
+                                { _id: { age: 30 }, count: 1 },
+                                { _id: { age: 20 }, count: 2 }
+                            ]);
+
+                            done();
+                        });
+                    });
+                });
+            });
         });
     });
 });
