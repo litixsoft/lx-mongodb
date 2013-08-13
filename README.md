@@ -291,7 +291,7 @@ var lxDb = require('lx-mongodb'),
 Returns a new mongo ObjectId.
 
 ```js
-var repo = basreRepo(collection, schema),
+var repo = BaseRepo(collection, schema),
     _id = repo.createNewId();
 
 _id instanceof ObjectID === true; // true
