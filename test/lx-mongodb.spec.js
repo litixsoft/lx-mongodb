@@ -172,6 +172,8 @@ describe('BaseRepo', function () {
         var res = userRepo.getValidationOptions();
 
         expect(res.deleteUnknownProperties).toBeTruthy();
+        expect(res.trim).toBeTruthy();
+        expect(res.strictRequired).toBeTruthy();
         expect(typeof res.convert).toBe('function');
     });
 

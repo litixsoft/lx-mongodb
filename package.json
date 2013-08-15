@@ -1,7 +1,7 @@
 {
     "name": "lx-mongodb",
     "description": "Litixsoft backend driver for mongoDb.",
-    "version": "0.4.3",
+    "version": "0.4.4",
     "homepage": "https://github.com/litixsoft/lx-mongodb",
     "author": {
         "name": "Litixsoft GmbH",

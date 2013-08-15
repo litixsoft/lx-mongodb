@@ -610,6 +610,8 @@ var repo = GridFsBaseRepo(collection),
     options = repo.getValidationOptions();
 
 options.deleteUnknownProperties === true; // true
+options.trim === true; // true
+options.strictRequired === true; // true
 typeof options.convert === 'function'; // true
 ```
 --
@@ -636,6 +638,9 @@ repo.put(new Buffer('Litixsoft'), {metadata: {'type': 'string'}}, function(err, 
 In lieu of a formal styleguide take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [grunt](http://gruntjs.com/).
 
 ## Release History
+### v0.4.4
+* add 'trim' and 'strictRequired' to the validationOptions
+
 ### v0.4.3
 * add option for multi update in update function in BaseRepo
 
