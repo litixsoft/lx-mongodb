@@ -181,14 +181,18 @@ describe('BaseRepo', function () {
         var convert = userRepo.getValidationOptions().convert,
             res = convert('mongo-id', '507f191e810c19729de860ea'),
             res2 = convert('date-time', '1973-06-01T15:49:00.000Z'),
-            res3 = convert(null, '132'),
-            res4 = convert(null, 111);
+            res3 = convert('date-time', '1973-06-01'),
+            res4 = convert(null, '132'),
+            res5 = convert(null, 111);
 
         expect(lxHelpers.isObject(res)).toBeTruthy();
         expect(res.toHexString()).toBe('507f191e810c19729de860ea');
         expect(lxHelpers.isDate(res2)).toBeTruthy();
-        expect(res3).toBe('132');
-        expect(res4).toBe(111);
+        expect(res2).toEqual(new Date('1973-06-01T15:49:00.000Z'));
+        expect(lxHelpers.isDate(res3)).toBeTruthy();
+        expect(res3).toEqual(new Date('1973-06-01'));
+        expect(res4).toBe('132');
+        expect(res5).toBe(111);
     });
 
     describe('has a function getCount() which', function () {

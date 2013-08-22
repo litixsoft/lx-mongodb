@@ -638,6 +638,9 @@ repo.put(new Buffer('Litixsoft'), {metadata: {'type': 'string'}}, function(err, 
 In lieu of a formal styleguide take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [grunt](http://gruntjs.com/).
 
 ## Release History
+### v0.4.5
+* also convert data that is of type 'string' and format 'date' in the convert function
+
 ### v0.4.4
 * add 'trim' and 'strictRequired' to the validationOptions
 
