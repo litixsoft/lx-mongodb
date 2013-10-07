@@ -181,7 +181,7 @@ describe('BaseRepo', function () {
         var convert = userRepo.getValidationOptions().convert,
             res = convert('mongo-id', '507f191e810c19729de860ea'),
             res2 = convert('date-time', '1973-06-01T15:49:00.000Z'),
-            res3 = convert('date-time', '1973-06-01'),
+            res3 = convert('date', '1973-06-01'),
             res4 = convert(null, '132'),
             res5 = convert(null, 111);
 
@@ -193,6 +193,16 @@ describe('BaseRepo', function () {
         expect(res3).toEqual(new Date('1973-06-01'));
         expect(res4).toBe('132');
         expect(res5).toBe(111);
+    });
+
+    describe('has a function createNewId() which', function () {
+        it('should return a new mongo ObjectID', function () {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            expect(typeof repo.createNewId()).toBe('object');
+            expect(repo.createNewId() instanceof ObjectID).toBeTruthy();
+        });
     });
 
     describe('has a function getCount() which', function () {

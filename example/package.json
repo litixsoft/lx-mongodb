@@ -8,6 +8,6 @@
         "email": "info@litixsoft.de"
     },
     "dependencies": {
-        "lx-valid": "~0.2.0"
+        "lx-valid": "~0.2.9"
     }
 }
