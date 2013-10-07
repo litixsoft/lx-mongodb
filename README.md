@@ -9,7 +9,7 @@ npm install lx-mongodb
 ```
 
 ## Documentation
-[http://www.litixsoft.de/products-lxmongodb](http://www.litixsoft.de/products-lxmongodb) (german)
+[http://www.litixsoft.de/products-lxmongodb.html](http://www.litixsoft.de/products-lxmongodb.html) (german)
 
 ## Examples
 ### Simple repository
