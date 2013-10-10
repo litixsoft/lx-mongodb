@@ -1,12 +1,9 @@
-# lx-mongodb [![Build Status](https://travis-ci.org/litixsoft/lx-mongodb.png?branch=master)](https://travis-ci.org/litixsoft/lx-mongodb)
+# lx-mongodb [![Build Status](https://travis-ci.org/litixsoft/lx-mongodb.png?branch=master)](https://travis-ci.org/litixsoft/lx-mongodb) [![david-dm](https://david-dm.org/litixsoft/lx-mongodb.png)](https://david-dm.org/litixsoft/lx-mongodb/) [![david-dm](https://david-dm.org/litixsoft/lx-mongodb/dev-status.png)](https://david-dm.org/litixsoft/lx-mongodb#info=devDependencies&view=table)
 
 Litixsoft backend driver for mongoDb based on mongojs.
 
 ## Install:
-
-```bash
-npm install lx-mongodb
-```
+[![NPM](https://nodei.co/npm/lx-mongodb.png??downloads=true&stars=true)](https://nodei.co/npm/lx-mongodb/)
 
 ## Documentation
 [http://www.litixsoft.de/products-lxmongodb.html](http://www.litixsoft.de/products-lxmongodb.html) (german)
