@@ -9,7 +9,24 @@ Litixsoft backend driver for mongoDb based on mongojs.
 [http://www.litixsoft.de/products-lxmongodb.html](http://www.litixsoft.de/products-lxmongodb.html) (german)
 
 ## Examples
-### Simple repository
+### Simple query
+```js
+var lxDb = require('lx-mongodb'),
+    db = lxDb.GetDb('localhost/blog?w=1&journal=True&fsync=True', ['users']),
+    repo = lxDb.BaseRepo(db.users);
+
+// get all users
+repo.getAll(function(error, result) {
+	console.log(result);
+});
+
+// add user
+repo.create({name: 'wayne', age: 99}, function(error, result) {
+	console.log(result);
+});
+```
+
+### Simple repository with JSON schema
 ```js
 var lxDb = require('lx-mongodb');
 
