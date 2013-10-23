@@ -37,7 +37,6 @@ module.exports = function (grunt) {
                 indent: 4,
                 quotmark: 'single',
                 loopfunc: true,
-                browser: true,
                 node: true,
                 globals: {
                 }

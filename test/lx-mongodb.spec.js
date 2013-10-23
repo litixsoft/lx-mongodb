@@ -50,25 +50,15 @@ beforeEach(function (done) {
 describe('lx-mongodb', function () {
     describe('has a function GetDb() which', function () {
         it('should throw an exception if the arguments are missing or of wrong type', function () {
-            var func1 = function () { return sut.GetDb(null); };
-            var func2 = function () { return sut.GetDb(undefined); };
-            var func3 = function () { return sut.GetDb(1); };
-            var func4 = function () { return sut.GetDb({}); };
-            var func5 = function () { return sut.GetDb([]); };
-            var func6 = function () { return sut.GetDb(true); };
-            var func7 = function () { return sut.GetDb(function () {}); };
-            var func8 = function () { return sut.GetDb(connectionString, ''); };
-            var func9 = function () { return sut.GetDb(connectionString, '', ''); };
-
-            expect(func1).toThrow();
-            expect(func2).toThrow();
-            expect(func3).toThrow();
-            expect(func4).toThrow();
-            expect(func5).toThrow();
-            expect(func6).toThrow();
-            expect(func7).toThrow();
-            expect(func8).toThrow();
-            expect(func9).toThrow();
+            expect(function () { return sut.GetDb(null); }).toThrow();
+            expect(function () { return sut.GetDb(undefined); }).toThrow();
+            expect(function () { return sut.GetDb(1); }).toThrow();
+            expect(function () { return sut.GetDb({}); }).toThrow();
+            expect(function () { return sut.GetDb([]); }).toThrow();
+            expect(function () { return sut.GetDb(true); }).toThrow();
+            expect(function () { return sut.GetDb(function () {}); }).toThrow();
+            expect(function () { return sut.GetDb(connectionString, ''); }).toThrow();
+            expect(function () { return sut.GetDb(connectionString, '', ''); }).toThrow();
         });
 
         it('should return the db with the given collections', function () {
@@ -93,6 +83,33 @@ describe('lx-mongodb', function () {
 
             expect(db).toBeDefined();
             expect(typeof db).toBe('object');
+        });
+
+        it('should return the db from cache if the connection string is the same', function () {
+            var db = sut.GetDb(connectionString);
+
+            expect(db).toBeDefined();
+            expect(typeof db).toBe('object');
+
+            var db2 = sut.GetDb(connectionString);
+
+            expect(db2).toBeDefined();
+            expect(typeof db2).toBe('object');
+            expect(db).toEqual(db);
+        });
+
+        it('should return a new db if the connection string is not the same', function () {
+            var db = sut.GetDb(connectionString);
+
+            expect(db).toBeDefined();
+            expect(typeof db).toBe('object');
+
+            var connectionString2 = connectionString.replace('w=1', 'w=0');
+            var db2 = sut.GetDb(connectionString2);
+
+            expect(db2).toBeDefined();
+            expect(typeof db2).toBe('object');
+            expect(db2).not.toEqual(db);
         });
 
         it('should return the db with the given gridFs collections', function () {
