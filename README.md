@@ -652,6 +652,9 @@ repo.put(new Buffer('Litixsoft'), {metadata: {'type': 'string'}}, function(err, 
 In lieu of a formal styleguide take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [grunt](http://gruntjs.com/).
 
 ## Release History
+### v0.4.7
+* update url to mongojs dependency
+
 ### v0.4.6
 * refactor caching of database connection, connections are now cached by connectionString
 
