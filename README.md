@@ -632,7 +632,7 @@ typeof options.convert === 'function'; // true
 --
 
 <a name="insert" />
-#### insert(doc, callback)
+#### insert(doc, options, callback)
 Creates one or more records in the mongoDb.
 
 __Arguments__
@@ -660,7 +660,7 @@ repo.insert({name: 'Litixsoft'}, {w: 1}, function(err, res) {
 --
 
 <a name="remove" />
-#### remove(query, callback)
+#### remove(query, options, callback)
 Deletes one or more records in the mongoDb.
 
 __Arguments__
