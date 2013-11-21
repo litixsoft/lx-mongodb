@@ -146,12 +146,37 @@ describe('BaseRepo', function () {
         repo.getCollection().indexInformation({full: true}, function (err, indexInformation) {
             expect(err).toBeNull();
             expect(indexInformation.length).toBe(6);
-            expect(indexInformation[0]).toEqual({ v: 1, key: { _id: 1 }, ns: 'blog.users', name: '_id_' });
-            expect(indexInformation[1]).toEqual({ v: 1, key: { 'a.aa.aaa.aaaa.name': 1 }, ns: 'blog.users', name: 'a.aa.aaa.aaaa.name_1' });
-            expect(indexInformation[2]).toEqual({ v: 1, key: { indexProp: 1 }, ns: 'blog.users', name: 'indexProp_1' });
-            expect(indexInformation[3]).toEqual({ v: 1, key: { uniqueProp: 1 }, ns: 'blog.users', name: 'uniqueProp_1', unique: true });
-            expect(indexInformation[4]).toEqual({ v: 1, key: { 'i.ii.iii.iiii.name': 1 }, ns: 'blog.users', name: 'i.ii.iii.iiii.name_1' });
-            expect(indexInformation[5]).toEqual({ v: 1, key: { 'a.aa.name': 1 }, ns: 'blog.users', name: 'a.aa.name_1', unique: true });
+
+            var i;
+            var length = indexInformation.length;
+
+            for (i = 0; i < length; i++) {
+                var idx = indexInformation[i];
+
+                if (idx.name === '_id_') {
+                    expect(idx).toEqual({ v: 1, key: { _id: 1 }, ns: 'blog.users', name: '_id_' });
+                }
+
+                if (idx.name === 'indexProp_1') {
+                    expect(idx).toEqual({ v: 1, key: { indexProp: 1 }, ns: 'blog.users', name: 'indexProp_1' });
+                }
+
+                if (idx.name === 'uniqueProp_1') {
+                    expect(idx).toEqual({ v: 1, key: { uniqueProp: 1 }, ns: 'blog.users', name: 'uniqueProp_1', unique: true });
+                }
+
+                if (idx.name === 'a.aa.name_1') {
+                    expect(idx).toEqual({ v: 1, key: { 'a.aa.name': 1 }, ns: 'blog.users', name: 'a.aa.name_1', unique: true });
+                }
+
+                if (idx.name === 'a.aa.aaa.aaaa.name_1') {
+                    expect(idx).toEqual({ v: 1, key: { 'a.aa.aaa.aaaa.name': 1 }, ns: 'blog.users', name: 'a.aa.aaa.aaaa.name_1' });
+                }
+
+                if (idx.name === 'i.ii.iii.iiii.name_1') {
+                    expect(idx).toEqual({ v: 1, key: { 'i.ii.iii.iiii.name': 1 }, ns: 'blog.users', name: 'i.ii.iii.iiii.name_1' });
+                }
+            }
 
             // drop collection to remove indexes
             db.users.drop(function () {
