@@ -7,6 +7,7 @@ module.exports = function (grunt) {
     // Project configuration.
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
+        jshint_files_to_test: ['Gruntfile.js', 'lib/**/*.js', 'test/**/*.js'],
         banner: '/*!\n' +
             ' * <%= pkg.title || pkg.name %> - v<%= pkg.version %> - <%= grunt.template.today("yyyy-mm-dd") %>\n' +
             '<%= pkg.homepage ? " * " + pkg.homepage + "\\n" : "" %>' +
@@ -21,34 +22,16 @@ module.exports = function (grunt) {
         },
         jshint: {
             options: {
-                bitwise: true,
-                curly: true,
-                eqeqeq: true,
-                forin: true,
-                immed: true,
-                latedef: true,
-                newcap: true,
-                noarg: true,
-                noempty: true,
-                nonew: true,
-                regexp: true,
-                undef: true,
-                unused: true,
-                indent: 4,
-                quotmark: 'single',
-                loopfunc: true,
-                node: true,
-                globals: {
-                }
+                jshintrc: true
             },
-            test: ['Gruntfile.js', 'lib/**/.js', 'test/**/*.js'],
+            test: '<%= jshint_files_to_test %>',
             jslint: {
                 options: {
                     reporter: 'jslint',
                     reporterOutput: 'build/reports/jshint.xml'
                 },
                 files: {
-                    src: ['Gruntfile.js', 'lib/**/.js', 'test/**/*.js']
+                    src: '<%= jshint_files_to_test %>'
                 }
             },
             checkstyle: {
@@ -57,7 +40,7 @@ module.exports = function (grunt) {
                     reporterOutput: 'build/reports/jshint_checkstyle.xml'
                 },
                 files: {
-                    src: ['Gruntfile.js', 'lib/**/.js', 'test/**/*.js']
+                    src: '<%= jshint_files_to_test %>'
                 }
             }
         },

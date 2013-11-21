@@ -203,15 +203,21 @@ userRepo.validate({userName: 'Wayne', age: 99}, function(err, res) {
 * [aggregate](#aggregate)
 * [createNewId](#createNewId)
 * [convertId](#convertId)
-* [create](#create)
-* [delete](#BaseRepository)
-* [getAll](#getAll)
+* [count](#count)
+* [create](#create) (deprecated)
+* [delete](#BaseRepository) (deprecated)
+* [find](#find)
+* [findOne](#findOne)
+* [findOneById](#findOneById)
+* [getAll](#getAll) (deprecated)
 * [getCollection](#getCollection)
-* [getCount](#getCount)
-* [getOne](#getOne)
-* [getOneById](#getOneById)
+* [getCount](#getCount) (deprecated)
+* [getOne](#getOne) (deprecated)
+* [getOneById](#getOneById) (deprecated)
 * [getSchema](#getSchema)
 * [getValidationOptions](#getValidationOptions)
+* [insert](#insert)
+* [remove](#remove)
 * [update](#update)
 
 ### Gridfs base repository
@@ -300,18 +306,6 @@ var lxDb = require('lx-mongodb'),
 ```
 --
 
-<a name="createNewId" />
-#### createNewId()
-Returns a new mongo ObjectId.
-
-```js
-var repo = BaseRepo(collection, schema),
-    _id = repo.createNewId();
-
-_id instanceof ObjectID === true; // true
-```
---
-
 <a name="convertId" />
 #### convertId(id)
 Converts a `string` to a mongo `ObjectID` and vice versa.
@@ -329,6 +323,18 @@ typeof idString === 'string'; // true
 ```
 --
 
+<a name="createNewId" />
+#### createNewId()
+Returns a new mongo ObjectId.
+
+```js
+var repo = BaseRepo(collection, schema),
+    _id = repo.createNewId();
+
+_id instanceof ObjectID === true; // true
+```
+--
+
 <a name="create" />
 #### create(doc, callback)
 Creates one or more records in the mongoDb.
@@ -336,12 +342,42 @@ Creates one or more records in the mongoDb.
 __Arguments__
 
 * __doc__ `{Array|Object}` - The data.
-* __callback__ `{function(err, res)}` - The callback function.
+* __callback__ `{!function(err, res)}` - The callback function.
 
 ```js
 var repo = BaseRepo(collection, schema);
 
 repo.create({name: 'Litixsoft', city: 'Leipzig'}, function(err, res) {
+    // more logic here
+});
+```
+--
+
+<a name="count" />
+#### count(query, options, callback)
+Returns the number of records.
+
+__Arguments__
+
+* __query__ `{Object|function(err, res)=}` - The query.
+* __options__ `{Object|function(err, res)=}` - The options object or the callback.
+* __callback__ `{!function(err, res)}` - The callback function.
+
+```js
+var repo = BaseRepo(collection, schema);
+
+// count all
+repo.count(function(err, res) {
+    // more logic here
+});
+
+// count with query
+repo.count({name: 'wayne'}, function(err, res) {
+    // more logic here
+});
+
+// count all with options
+repo.count({skip: 1, limit: 5}, function(err, res) {
     // more logic here
 });
 ```
@@ -364,6 +400,97 @@ repo.delete({_id: '5108e9333cb086801f000035'}, function(err, res) {
 });
 
 repo.delete({city: 'Berlin'}, function(err, res) {
+    // more logic here
+});
+```
+--
+
+<a name="find" />
+#### find(query, options, callback)
+Gets the records from the mongoDb.
+
+__Arguments__
+
+* __query__ `{Object|function(err, res)=}` - The query.
+* __options__ `{Object|function(err, res)=}` - The mongoDb query options.
+* __options.fields__ `{(Array|Object)=}` - The fields which should be returned by the query.
+* __options.limit__ `{Number=}` - The number of records which should be returned by the query.
+* __options.skip__ `{Number=}`- The number of records which should be skipped by the query.
+* __options.sort__ `{(Array|String|Object)=}` - The sorting of the returned records.
+* __callback__ `{!function(err, res)}` - The callback function.
+
+```js
+var repo = BaseRepo(collection, schema);
+
+// find all
+repo.find(function(err, res) {
+    // more logic here
+});
+
+// find and convert mongo-id
+repo.find({_id: '511106fc574d81d815000001'}, function(err, res) {
+    // more logic here
+});
+
+// find with query
+repo.find({name: 'Litixsoft'}, {skip: 0, limit: 10, sort: {name: 1}, fields: ['name', 'city']}, function(err, res) {
+    // more logic here
+});
+
+// find all with options
+repo.find({skip: 0, limit: 10, sort: {name: 1}, fields: ['name', 'city']}, function(err, res) {
+    // more logic here
+});
+```
+--
+
+<a name="findOne" />
+#### findOne(query, options, callback)
+Gets one record from the mongoDb.
+
+__Arguments__
+
+* __query__ `{!Object}` - The query.
+* __options__ `{Object|function(err, res)=}` - The mongoDb query options or the callback.
+* __options.fields__ `{(Array|Object)=}` - The fields which should be returned by the query.
+* __options.limit__ `{Number=}` - The number of records which should be returned by the query.
+* __options.skip__ `{Number=}`- The number of records which should be skipped by the query.
+* __options.sort__ `{(Array|String|Object)=}` - The sorting of the returned records.
+* __callback__ `{!function(err, res)}` - The callback function.
+
+```js
+var repo = BaseRepo(collection, schema);
+
+repo.findOne({name: 'Litixsoft'}, function(err, res) {
+    // more logic here
+});
+
+repo.findOne({name: 'Litixsoft'}, {skip: 0, limit: 10, sort: {name: 1}, fields: ['name', 'city']}, function(err, res) {
+    // more logic here
+});
+```
+--
+
+<a name="findOneById" />
+#### findOneById(id, options, callback)
+Gets one record by id from the mongoDb.
+
+__Arguments__
+
+* __id__ `{!Object|string}` - The id.
+* __options__ `{Object|function(err, res)}` - The mongoDb query options or the callback.
+* __options.fields__ `{(Array|Object)=}` - The fields which should be returned by the query.
+* __callback__ `{!function(err, res)}` - The callback function.
+
+```js
+var repo = BaseRepo(collection, schema),
+    myId = repo.convertId('5108e9333cb086801f000035');
+
+repo.findOneById('5108e9333cb086801f000035', function(err, res) {
+    // more logic here
+});
+
+repo.findOneById(myId, {fields: ['name', 'city']}, function(err, res) {
     // more logic here
 });
 ```
@@ -504,16 +631,72 @@ typeof options.convert === 'function'; // true
 ```
 --
 
+<a name="insert" />
+#### insert(doc, callback)
+Creates one or more records in the mongoDb.
+
+__Arguments__
+
+* __doc__ `{!Object|!Array}` - The document/s.
+* __options__ `{Object|function(err, res)=}` - The options object or the callback.
+* __callback__ `{function(err, res)=}` - The callback function.
+
+```js
+var repo = BaseRepo(collection, schema);
+
+// insert
+repo.insert({name: 'Litixsoft', city: 'Leipzig'});
+
+// insert with callback
+repo.insert({name: 'Litixsoft', city: 'Leipzig'}, function(err, res) {
+    // more logic here
+});
+
+// insert with callback
+repo.insert({name: 'Litixsoft'}, {w: 1}, function(err, res) {
+    // more logic here
+})
+```
+--
+
+<a name="remove" />
+#### remove(query, callback)
+Deletes one or more records in the mongoDb.
+
+__Arguments__
+
+* __query__ `{Object=}` - The query.
+* __options__ `{Object=}` - The mongo options.
+* __callback__ `{function(err, res)=}` - The callback function.
+
+```js
+var repo = BaseRepo(collection, schema);
+
+// remove all
+repo.remove();
+
+// remove with callback and coverting of mongo-id
+repo.remove({_id: '5108e9333cb086801f000035'}, function(err, res) {
+    // more logic here
+});
+
+// remove with options
+repo.remove({city: 'Berlin'}, {w: 1}, function(err, res) {
+    // more logic here
+});
+```
+--
+
 <a name="update" />
 #### update(query, update, options, callback)
 Updates one or more records in the mongoDb.
 
 __Arguments__
 
-* __query__ `{Object}` - The query.
-* __update__ `{Object}` - The data to update.
+* __query__ `{!Object}` - The query.
+* __update__ `{!Object}` - The data to update.
 * __options__ `{Object=}` - The options for multi update.
-* __callback__ `{function(err, res)}` - The callback function.
+* __callback__ `{!function(err, res)}` - The callback function.
 
 ```js
 var repo = BaseRepo(collection, schema);
@@ -611,10 +794,6 @@ var repo = GridFsBaseRepo(collection),
     myCollection = repo.getCollection();
 
 collection == myCollection; // true
-```
---
-
-<a name="getValidationOptions1" />
 #### getValidationOptions()
 Returns an object with the validation options. This is especially useful in combination with [lx-valid](https://github.com/litixsoft/lx-valid).
 The method `convert()` can also be used by other schema validators.
@@ -652,6 +831,12 @@ repo.put(new Buffer('Litixsoft'), {metadata: {'type': 'string'}}, function(err, 
 In lieu of a formal styleguide take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [grunt](http://gruntjs.com/).
 
 ## Release History
+### v0.5.0
+* rename some functions to match the mongo driver names (find, findOne, insert, remove, count)
+* create an index when a property in the schema has the setting index: true
+* create an unique index when a property in the schema has the setting unique: true
+* add .jshintrc to store the jshint settings
+
 ### v0.4.7
 * update url to mongojs dependency
 

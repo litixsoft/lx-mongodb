@@ -31,7 +31,7 @@ var pipeline = [
 beforeEach(function (done) {
     // clear db
     var db = sut.GetDb(connectionString, ['users', 'posts', 'tags', 'categories', 'comments', 'documents.files'], ['documents']);
-    db.users.drop(function () {
+    db.users.remove(function () {
         db.documents.files.drop(function () {
             done();
         });
@@ -138,6 +138,28 @@ describe('BaseRepo', function () {
         expect(func4).toThrow();
     });
 
+    it('should analyse the schema an set the indexes', function (done) {
+        var db = sut.GetDb(connectionString);
+        var repo = sut.BaseRepo(db.users);
+
+        // Fetch basic indexInformation for collection
+        repo.getCollection().indexInformation({full: true}, function (err, indexInformation) {
+            expect(err).toBeNull();
+            expect(indexInformation.length).toBe(6);
+            expect(indexInformation[0]).toEqual({ v: 1, key: { _id: 1 }, ns: 'blog.users', name: '_id_' });
+            expect(indexInformation[1]).toEqual({ v: 1, key: { 'a.aa.aaa.aaaa.name': 1 }, ns: 'blog.users', name: 'a.aa.aaa.aaaa.name_1' });
+            expect(indexInformation[2]).toEqual({ v: 1, key: { indexProp: 1 }, ns: 'blog.users', name: 'indexProp_1' });
+            expect(indexInformation[3]).toEqual({ v: 1, key: { uniqueProp: 1 }, ns: 'blog.users', name: 'uniqueProp_1', unique: true });
+            expect(indexInformation[4]).toEqual({ v: 1, key: { 'i.ii.iii.iiii.name': 1 }, ns: 'blog.users', name: 'i.ii.iii.iiii.name_1' });
+            expect(indexInformation[5]).toEqual({ v: 1, key: { 'a.aa.name': 1 }, ns: 'blog.users', name: 'a.aa.name_1', unique: true });
+
+            // drop collection to remove indexes
+            db.users.drop(function () {
+                done();
+            });
+        });
+    });
+
     it('has a function getCollection() which should return the collection', function () {
         var db = sut.GetDb(connectionString);
         var repo = sut.BaseRepo(db.users);
@@ -230,8 +252,8 @@ describe('BaseRepo', function () {
             repo.getCount(function (error, result) {
                 expect(result).toBe(0);
 
-                repo.create(user, function () {
-                    repo.create({userName: 'wayne'}, function () {
+                repo.insert(user, function () {
+                    repo.insert({userName: 'wayne'}, function () {
                         repo.getCount(function (error, result) {
                             expect(result).toBe(2);
 
@@ -254,7 +276,59 @@ describe('BaseRepo', function () {
                 expect(result).toBe(null);
                 expect(error).toBeDefined();
                 expect(error instanceof TypeError).toBeTruthy();
-                expect(error.message).toBe('Param "query" is of type [object Number]! Type [object Object] expected');
+                expect(error.message).toBe('Param "query" is of type number! Type object expected');
+
+                done();
+            });
+        });
+    });
+
+    describe('has a function count() which', function () {
+        it('should throw an exception if the params are wrong', function () {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            expect(function () { return repo.count(null); }).toThrow();
+            expect(function () { return repo.count({}, {}, null); }).toThrow();
+            expect(function () { return repo.count({}, null); }).toThrow();
+        });
+
+        it('should return the number of documents of the collection in the BaseRepo', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.count(function (error, result) {
+                expect(result).toBe(0);
+
+                repo.insert(user, function () {
+                    repo.insert({userName: 'wayne'}, function () {
+                        repo.count(function (error, result) {
+                            expect(result).toBe(2);
+
+                            repo.count({userName: 'wayne'}, function (error, result) {
+                                expect(result).toBe(1);
+
+                                repo.count({limit: 1}, function (error, result) {
+                                    expect(result).toBe(1);
+
+                                    done();
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
+
+        it('should return an error callback when the param "query" is not of type object', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.count(123, function (error, result) {
+                expect(result).toBe(null);
+                expect(error).toBeDefined();
+                expect(error instanceof TypeError).toBeTruthy();
+                expect(error.message).toBe('Param "query" is of type number! Type object expected');
 
                 done();
             });
@@ -305,7 +379,7 @@ describe('BaseRepo', function () {
                 expect(result).toBeNull();
                 expect(error).toBeDefined();
                 expect(error instanceof TypeError).toBeTruthy();
-                expect(error.message).toBe('Param "doc" is of type [object Number]! Type [object Object] or [object Array] expected');
+                expect(error.message).toBe('Param "doc" is of type number! Type object or array expected');
 
                 done();
             });
@@ -327,6 +401,106 @@ describe('BaseRepo', function () {
         });
     });
 
+    describe('has a function insert() which', function () {
+        it('should insert a new document in the collection', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.insert(user, function (error, result) {
+                expect(result).toBeDefined();
+                expect(Array.isArray(result)).toBeTruthy();
+                expect(result[0].firstName).toBe('Chuck');
+                expect(result[0].lastName).toBe('Norris');
+                expect(result[0].userName).toBe('chuck');
+                expect(result[0].email).toBe('chuck@norris.com');
+                expect(result[0].birthdate instanceof Date).toBeTruthy();
+                done();
+            });
+        });
+
+        it('should insert a new document in the collection without callback', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.insert(user);
+
+            setTimeout(function () {
+                repo.getAll({userName: 'chuck'}, function (err, result) {
+                    expect(result).toBeDefined();
+                    expect(Array.isArray(result)).toBeTruthy();
+                    expect(result[0].firstName).toBe('Chuck');
+                    expect(result[0].lastName).toBe('Norris');
+                    expect(result[0].userName).toBe('chuck');
+                    expect(result[0].email).toBe('chuck@norris.com');
+                    expect(result[0].birthdate instanceof Date).toBeTruthy();
+                    done();
+                });
+            }, 100);
+        });
+
+        it('should insert a new document in the collection with options and without callback', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.insert(user, {w: 0});
+
+            setTimeout(function () {
+                repo.getAll({userName: 'chuck'}, function (err, result) {
+                    expect(result).toBeDefined();
+                    expect(Array.isArray(result)).toBeTruthy();
+                    expect(result[0].firstName).toBe('Chuck');
+                    expect(result[0].lastName).toBe('Norris');
+                    expect(result[0].userName).toBe('chuck');
+                    expect(result[0].email).toBe('chuck@norris.com');
+                    expect(result[0].birthdate instanceof Date).toBeTruthy();
+                    done();
+                });
+            }, 100);
+        });
+
+        it('should insert an array with new documents in the collection', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+            var doc = [user, {userName: 'test'}, {lastName: 'wayne'}];
+
+            repo.insert(doc, function (error, result) {
+                expect(result).toBeDefined();
+                expect(Array.isArray(result)).toBeTruthy();
+                expect(result.length).toBe(3);
+                expect(result[0].firstName).toBe('Chuck');
+                expect(result[0].lastName).toBe('Norris');
+                expect(result[0].userName).toBe('chuck');
+                expect(result[0].email).toBe('chuck@norris.com');
+                expect(result[0].birthdate instanceof Date).toBeTruthy();
+
+                done();
+            });
+        });
+
+        it('should return an error callback when the param "doc" is not of type object or array', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.insert(123, function (error, result) {
+                expect(result).toBeNull();
+                expect(error).toBeDefined();
+                expect(error instanceof TypeError).toBeTruthy();
+                expect(error.message).toBe('Param "doc" is of type number! Type object or array expected');
+
+                done();
+            });
+        });
+
+        it('should throw an exception if the params are wrong', function () {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            expect(function () { return repo.insert(null); }).toThrow();
+            expect(function () { return repo.insert({}, {}, 2); }).toThrow();
+            expect(function () { return repo.insert({}, 1); }).toThrow();
+        });
+    });
+
     describe('has a function getAll() which', function () {
         it('should throw an exception if the params are of wrong type', function () {
             var func = function () { return userRepo.getAll(); };
@@ -342,8 +516,8 @@ describe('BaseRepo', function () {
             var db = sut.GetDb(connectionString);
             var repo = sut.BaseRepo(db.users);
 
-            repo.create(user, function () {
-                repo.create({userName: 'wayne'}, function () {
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
                     repo.getAll(function (err, res) {
                         expect(err).toBeNull();
                         expect(Array.isArray(res)).toBeTruthy();
@@ -361,8 +535,8 @@ describe('BaseRepo', function () {
             var db = sut.GetDb(connectionString);
             var repo = sut.BaseRepo(db.users);
 
-            repo.create(user, function () {
-                repo.create({userName: 'wayne'}, function () {
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
                     repo.getAll(123, function (err, res) {
                         expect(err).toBeDefined();
                         expect(err instanceof TypeError).toBeTruthy();
@@ -378,8 +552,8 @@ describe('BaseRepo', function () {
             var db = sut.GetDb(connectionString);
             var repo = sut.BaseRepo(db.users);
 
-            repo.create(user, function () {
-                repo.create({userName: 'wayne'}, function () {
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
                     repo.getAll({limit: 1}, function (err, res) {
                         expect(err).toBeNull();
                         expect(Array.isArray(res)).toBeTruthy();
@@ -394,11 +568,11 @@ describe('BaseRepo', function () {
         it('should get all documents of the collection and convert $in in query with ids', function (done) {
             var ids = [];
 
-            userRepo.create(user, function (err, res) {
+            userRepo.insert(user, function (err, res) {
                 ids.push(res[0]._id.toString());
-                userRepo.create({userName: 'wayne'}, function (err, res) {
+                userRepo.insert({userName: 'wayne'}, function (err, res) {
                     ids.push(res[0]._id.toString());
-                    userRepo.create({userName: 'who'}, function () {
+                    userRepo.insert({userName: 'who'}, function () {
                         userRepo.getAll({_id: {$in: ids}}, function (err, res) {
                             expect(err).toBeNull();
                             expect(Array.isArray(res)).toBeTruthy();
@@ -416,11 +590,11 @@ describe('BaseRepo', function () {
         it('should get all documents of the collection and not convert $in in query with ids when ids are already mongo-ids', function (done) {
             var ids = [];
 
-            userRepo.create(user, function (err, res) {
+            userRepo.insert(user, function (err, res) {
                 ids.push(res[0]._id);
-                userRepo.create({userName: 'wayne'}, function (err, res) {
+                userRepo.insert({userName: 'wayne'}, function (err, res) {
                     ids.push(res[0]._id);
-                    userRepo.create({userName: 'who'}, function () {
+                    userRepo.insert({userName: 'who'}, function () {
                         userRepo.getAll({_id: {$in: ids}}, function (err, res) {
                             expect(err).toBeNull();
                             expect(Array.isArray(res)).toBeTruthy();
@@ -439,8 +613,8 @@ describe('BaseRepo', function () {
             var db = sut.GetDb(connectionString);
             var repo = sut.BaseRepo(db.users);
 
-            repo.create(user, function () {
-                repo.create({userName: 'wayne'}, function () {
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
                     repo.getAll({userName: 'wayne'}, function (err, res) {
                         expect(Array.isArray(res)).toBeTruthy();
                         expect(res.length).toBe(1);
@@ -455,8 +629,8 @@ describe('BaseRepo', function () {
             var db = sut.GetDb(connectionString);
             var repo = sut.BaseRepo(db.users);
 
-            repo.create(user, function () {
-                repo.create({userName: 'wayne'}, function () {
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
                     repo.getAll({}, {limit: 1}, function (err, res) {
                         expect(Array.isArray(res)).toBeTruthy();
                         expect(res.length).toBe(1);
@@ -471,8 +645,8 @@ describe('BaseRepo', function () {
             var db = sut.GetDb(connectionString);
             var repo = sut.BaseRepo(db.users);
 
-            repo.create(user, function () {
-                repo.create({userName: 'wayne'}, function () {
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
                     repo.getAll({}, {skip: 1}, function (err, res) {
                         expect(Array.isArray(res)).toBeTruthy();
                         expect(res.length).toBe(1);
@@ -491,8 +665,8 @@ describe('BaseRepo', function () {
                 fields: ['userName', 'lastName']
             };
 
-            repo.create(user, function () {
-                repo.create({userName: 'wayne'}, function () {
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
                     repo.getAll({}, options, function (err, res) {
                         expect(Array.isArray(res)).toBeTruthy();
                         expect(res.length).toBe(2);
@@ -525,8 +699,8 @@ describe('BaseRepo', function () {
                 }
             };
 
-            repo.create(user, function () {
-                repo.create({userName: 'wayne'}, function () {
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
                     repo.getAll({}, options, function (err, res) {
                         expect(Array.isArray(res)).toBeTruthy();
                         expect(res.length).toBe(2);
@@ -556,8 +730,8 @@ describe('BaseRepo', function () {
                 sort: {'userName': 1}
             };
 
-            repo.create(user, function () {
-                repo.create({userName: 'wayne'}, function () {
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
                     repo.getAll({}, options, function (err, res) {
                         expect(Array.isArray(res)).toBeTruthy();
                         expect(res.length).toBe(2);
@@ -580,8 +754,8 @@ describe('BaseRepo', function () {
                 }
             };
 
-            repo.create(user, function () {
-                repo.create({userName: 'wayne'}, function () {
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
                     repo.getAll({}, options, function (err, res) {
                         expect(Array.isArray(res)).toBeTruthy();
                         expect(res.length).toBe(2);
@@ -602,8 +776,8 @@ describe('BaseRepo', function () {
                 sort: 'userName'
             };
 
-            repo.create(user, function () {
-                repo.create({userName: 'wayne'}, function () {
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
                     repo.getAll({}, options, function (err, res) {
                         expect(Array.isArray(res)).toBeTruthy();
                         expect(res.length).toBe(2);
@@ -624,9 +798,9 @@ describe('BaseRepo', function () {
                 sort: ['userName', 'age']
             };
 
-            repo.create(user, function () {
-                repo.create({userName: 'wayne', age: 15}, function () {
-                    repo.create({userName: 'wayne', age: 10}, function () {
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne', age: 15}, function () {
+                    repo.insert({userName: 'wayne', age: 10}, function () {
                         repo.getAll({}, options, function (err, res) {
                             expect(Array.isArray(res)).toBeTruthy();
                             expect(res.length).toBe(3);
@@ -654,9 +828,9 @@ describe('BaseRepo', function () {
                 ]
             };
 
-            repo.create(user, function () {
-                repo.create({userName: 'wayne', age: 10}, function () {
-                    repo.create({userName: 'wayne', age: 15}, function () {
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne', age: 10}, function () {
+                    repo.insert({userName: 'wayne', age: 15}, function () {
                         repo.getAll({}, options, function (err, res) {
                             expect(Array.isArray(res)).toBeTruthy();
                             expect(res.length).toBe(3);
@@ -684,9 +858,9 @@ describe('BaseRepo', function () {
                 }
             };
 
-            repo.create(user, function () {
-                repo.create({userName: 'wayne', age: 10}, function () {
-                    repo.create({userName: 'wayne', age: 15}, function () {
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne', age: 10}, function () {
+                    repo.insert({userName: 'wayne', age: 15}, function () {
                         repo.getAll({}, options, function (err, res) {
                             expect(Array.isArray(res)).toBeTruthy();
                             expect(res.length).toBe(3);
@@ -705,8 +879,8 @@ describe('BaseRepo', function () {
         });
 
         it('should get all documents of the collection with the default sorting', function (done) {
-            userRepo.create(user, function () {
-                userRepo.create({userName: 'aaa'}, function () {
+            userRepo.insert(user, function () {
+                userRepo.insert({userName: 'aaa'}, function () {
                     userRepo.getAll(function (err, res) {
                         expect(Array.isArray(res)).toBeTruthy();
                         expect(res.length).toBe(2);
@@ -721,8 +895,8 @@ describe('BaseRepo', function () {
         });
 
         it('should get all documents of the collection with the default sorting when param sort is empty', function (done) {
-            userRepo.create(user, function () {
-                userRepo.create({userName: 'aaa'}, function () {
+            userRepo.insert(user, function () {
+                userRepo.insert({userName: 'aaa'}, function () {
                     userRepo.getAll({}, {sort: null}, function (err, res) {
                         expect(Array.isArray(res)).toBeTruthy();
                         expect(res.length).toBe(2);
@@ -737,10 +911,10 @@ describe('BaseRepo', function () {
         });
 
         it('should get all documents of the collection and convert the id in the query to mongo id', function (done) {
-            userRepo.create(user, function (err, res) {
+            userRepo.insert(user, function (err, res) {
                 var id = res[0]._id;
 
-                userRepo.create({userName: 'aaa', chief_id: id}, function () {
+                userRepo.insert({userName: 'aaa', chief_id: id}, function () {
                     userRepo.getAll({chief_id: id.toHexString()}, function (err, res1) {
                         expect(Array.isArray(res1)).toBeTruthy();
                         expect(res1.length).toBe(1);
@@ -748,6 +922,439 @@ describe('BaseRepo', function () {
                         expect(res1[0].chief_id.toHexString()).toBe(id.toHexString());
 
                         done();
+                    });
+                });
+            });
+        });
+    });
+
+    describe('has a function find() which', function () {
+        it('should throw an exception if the params are of wrong type', function () {
+            expect(function () { return userRepo.find(); }).toThrow();
+            expect(function () { return userRepo.find(1, 2); }).toThrow();
+            expect(function () { return userRepo.find(1, 2, 3); }).toThrow();
+        });
+
+        it('should get all documents of the collection', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
+                    repo.find(function (err, res) {
+                        expect(err).toBeNull();
+                        expect(Array.isArray(res)).toBeTruthy();
+                        expect(res.length).toBe(2);
+                        expect(res[0].userName).toBe('chuck');
+                        expect(res[1].userName).toBe('wayne');
+
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('should callback with an error if the param "query" is not an object', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
+                    repo.find(123, function (err, res) {
+                        expect(err).toBeDefined();
+                        expect(err instanceof TypeError).toBeTruthy();
+                        expect(res).toBeNull();
+
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('should get all documents of the collection and check the query', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
+                    repo.find({limit: 1}, function (err, res) {
+                        expect(err).toBeNull();
+                        expect(Array.isArray(res)).toBeTruthy();
+                        expect(res.length).toBe(1);
+
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('should get all documents of the collection and convert $in in query with ids', function (done) {
+            var ids = [];
+
+            userRepo.insert(user, function (err, res) {
+                ids.push(res[0]._id.toString());
+                userRepo.insert({userName: 'wayne'}, function (err, res) {
+                    ids.push(res[0]._id.toString());
+                    userRepo.insert({userName: 'who'}, function () {
+                        userRepo.find({_id: {$in: ids}}, function (err, res) {
+                            expect(err).toBeNull();
+                            expect(Array.isArray(res)).toBeTruthy();
+                            expect(res.length).toBe(2);
+                            expect(res[0].userName).toBe('chuck');
+                            expect(res[1].userName).toBe('wayne');
+
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('should get all documents of the collection and not convert $in in query with ids when ids are already mongo-ids', function (done) {
+            var ids = [];
+
+            userRepo.insert(user, function (err, res) {
+                ids.push(res[0]._id);
+                userRepo.insert({userName: 'wayne'}, function (err, res) {
+                    ids.push(res[0]._id);
+                    userRepo.insert({userName: 'who'}, function () {
+                        userRepo.find({_id: {$in: ids}}, function (err, res) {
+                            expect(err).toBeNull();
+                            expect(Array.isArray(res)).toBeTruthy();
+                            expect(res.length).toBe(2);
+                            expect(res[0].userName).toBe('chuck');
+                            expect(res[1].userName).toBe('wayne');
+
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('should get all documents of the collection with filter', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
+                    repo.find({userName: 'wayne'}, function (err, res) {
+                        expect(Array.isArray(res)).toBeTruthy();
+                        expect(res.length).toBe(1);
+
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('should get all documents of the collection with limit', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
+                    repo.find({}, {limit: 1}, function (err, res) {
+                        expect(Array.isArray(res)).toBeTruthy();
+                        expect(res.length).toBe(1);
+
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('should get all documents of the collection with skip', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
+                    repo.find({}, {skip: 1}, function (err, res) {
+                        expect(Array.isArray(res)).toBeTruthy();
+                        expect(res.length).toBe(1);
+                        expect(res[0].userName).toBe('wayne');
+
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('should get all documents of the collection with the specified fields Array', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+            var options = {
+                fields: ['userName', 'lastName']
+            };
+
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
+                    repo.find({}, options, function (err, res) {
+                        expect(Array.isArray(res)).toBeTruthy();
+                        expect(res.length).toBe(2);
+
+                        expect(res[0].userName).toBe('chuck');
+                        expect(res[0].lastName).toBe('Norris');
+                        expect(res[0]._id).toBeDefined();
+                        expect(res[0].email).toBeUndefined();
+                        expect(res[0].birthdate).toBeUndefined();
+                        expect(Object.keys(res[0]).length).toBe(3);
+
+                        expect(res[1].userName).toBe('wayne');
+                        expect(res[1].lastName).toBeUndefined();
+                        expect(res[1].lastName).toBeUndefined();
+                        expect(Object.keys(res[1]).length).toBe(2);
+
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('should get all documents of the collection with the specified fields Object', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+            var options = {
+                fields: {
+                    'userName': 1,
+                    'lastName': 1
+                }
+            };
+
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
+                    repo.find({}, options, function (err, res) {
+                        expect(Array.isArray(res)).toBeTruthy();
+                        expect(res.length).toBe(2);
+
+                        expect(res[0].userName).toBe('chuck');
+                        expect(res[0].lastName).toBe('Norris');
+                        expect(res[0]._id).toBeDefined();
+                        expect(res[0].email).toBeUndefined();
+                        expect(res[0].birthdate).toBeUndefined();
+                        expect(Object.keys(res[0]).length).toBe(3);
+
+                        expect(res[1].userName).toBe('wayne');
+                        expect(res[1].lastName).toBeUndefined();
+                        expect(res[1].lastName).toBeUndefined();
+                        expect(Object.keys(res[1]).length).toBe(2);
+
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('should get all documents of the collection with the specified sorting ascending', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+            var options = {
+                sort: {'userName': 1}
+            };
+
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
+                    repo.find({}, options, function (err, res) {
+                        expect(Array.isArray(res)).toBeTruthy();
+                        expect(res.length).toBe(2);
+
+                        expect(res[0].userName).toBe('chuck');
+                        expect(res[1].userName).toBe('wayne');
+
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('should get all documents of the collection with the specified sorting descending', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+            var options = {
+                sort: {
+                    userName: -1
+                }
+            };
+
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
+                    repo.find({}, options, function (err, res) {
+                        expect(Array.isArray(res)).toBeTruthy();
+                        expect(res.length).toBe(2);
+
+                        expect(res[0].userName).toBe('wayne');
+                        expect(res[1].userName).toBe('chuck');
+
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('should get all documents of the collection and sort by string', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+            var options = {
+                sort: 'userName'
+            };
+
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
+                    repo.find({}, options, function (err, res) {
+                        expect(Array.isArray(res)).toBeTruthy();
+                        expect(res.length).toBe(2);
+
+                        expect(res[0].userName).toBe('chuck');
+                        expect(res[1].userName).toBe('wayne');
+
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('should get all documents of the collection and sort by array of strings', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+            var options = {
+                sort: ['userName', 'age']
+            };
+
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne', age: 15}, function () {
+                    repo.insert({userName: 'wayne', age: 10}, function () {
+                        repo.find({}, options, function (err, res) {
+                            expect(Array.isArray(res)).toBeTruthy();
+                            expect(res.length).toBe(3);
+
+                            expect(res[0].userName).toBe('chuck');
+                            expect(res[1].userName).toBe('wayne');
+                            expect(res[1].age).toBe(10);
+                            expect(res[2].userName).toBe('wayne');
+                            expect(res[2].age).toBe(15);
+
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('should get all documents of the collection and sort by array', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+            var options = {
+                sort: [
+                    ['userName', 1],
+                    ['age' , -1]
+                ]
+            };
+
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne', age: 10}, function () {
+                    repo.insert({userName: 'wayne', age: 15}, function () {
+                        repo.find({}, options, function (err, res) {
+                            expect(Array.isArray(res)).toBeTruthy();
+                            expect(res.length).toBe(3);
+
+                            expect(res[0].userName).toBe('chuck');
+                            expect(res[1].userName).toBe('wayne');
+                            expect(res[1].age).toBe(15);
+                            expect(res[2].userName).toBe('wayne');
+                            expect(res[2].age).toBe(10);
+
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('should get all documents of the collection and sort by object', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+            var options = {
+                sort: {
+                    userName: 1,
+                    age: -1
+                }
+            };
+
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne', age: 10}, function () {
+                    repo.insert({userName: 'wayne', age: 15}, function () {
+                        repo.find({}, options, function (err, res) {
+                            expect(Array.isArray(res)).toBeTruthy();
+                            expect(res.length).toBe(3);
+
+                            expect(res[0].userName).toBe('chuck');
+                            expect(res[1].userName).toBe('wayne');
+                            expect(res[1].age).toBe(15);
+                            expect(res[2].userName).toBe('wayne');
+                            expect(res[2].age).toBe(10);
+
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('should get all documents of the collection with the default sorting', function (done) {
+            userRepo.insert(user, function () {
+                userRepo.insert({userName: 'aaa'}, function () {
+                    userRepo.find(function (err, res) {
+                        expect(Array.isArray(res)).toBeTruthy();
+                        expect(res.length).toBe(2);
+
+                        expect(res[0].userName).toBe('aaa');
+                        expect(res[1].userName).toBe('chuck');
+
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('should get all documents of the collection with the default sorting when param sort is empty', function (done) {
+            userRepo.insert(user, function () {
+                userRepo.insert({userName: 'aaa'}, function () {
+                    userRepo.find({}, {sort: null}, function (err, res) {
+                        expect(Array.isArray(res)).toBeTruthy();
+                        expect(res.length).toBe(2);
+
+                        expect(res[0].userName).toBe('aaa');
+                        expect(res[1].userName).toBe('chuck');
+
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('should get all documents of the collection and convert the id in the query to mongo id', function (done) {
+            userRepo.insert(user, function (err, res) {
+                var id = res[0]._id;
+
+                userRepo.insert({userName: 'aaa', chief_id: id, i: {ii: {manager_id: id}}}, function (err, res) {
+                    expect(err).toBeNull();
+                    expect(res).toBeDefined();
+
+                    userRepo.find({chief_id: id.toHexString()}, function (err, res1) {
+                        expect(Array.isArray(res1)).toBeTruthy();
+                        expect(res1.length).toBe(1);
+                        expect(res1[0].userName).toBe('aaa');
+                        expect(res1[0].chief_id.toHexString()).toBe(id.toHexString());
+
+                        userRepo.find({'i.ii.manager_id': id.toHexString()}, function (err, res1) {
+                            expect(Array.isArray(res1)).toBeTruthy();
+                            expect(res1.length).toBe(1);
+                            expect(res1[0].userName).toBe('aaa');
+                            expect(res1[0].i.ii.manager_id.toHexString()).toBe(id.toHexString());
+
+                            done();
+                        });
                     });
                 });
             });
@@ -769,8 +1376,8 @@ describe('BaseRepo', function () {
             var db = sut.GetDb(connectionString);
             var repo = sut.BaseRepo(db.users);
 
-            repo.create(user, function () {
-                repo.create({userName: 'wayne'}, function () {
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
                     repo.getOne({userName: 'chuck'}, function (err, res) {
                         expect(res).toBeDefined();
                         expect(res.userName).toBe('chuck');
@@ -786,8 +1393,8 @@ describe('BaseRepo', function () {
             var db = sut.GetDb(connectionString);
             var repo = sut.BaseRepo(db.users);
 
-            repo.create(user, function () {
-                repo.create({userName: 'wayne'}, function () {
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
                     repo.getOne(123, function (err, res) {
                         expect(err).toBeDefined();
                         expect(err instanceof TypeError).toBeTruthy();
@@ -803,8 +1410,8 @@ describe('BaseRepo', function () {
             var db = sut.GetDb(connectionString);
             var repo = sut.BaseRepo(db.users);
 
-            repo.create(user, function () {
-                repo.create({userName: 'wayne'}, function () {
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
                     repo.getOne({fields: ['_id']}, function (err, res) {
                         expect(res).toBeDefined();
 //                        expect(res.userName).toBe('chuck');
@@ -832,8 +1439,8 @@ describe('BaseRepo', function () {
             var db = sut.GetDb(connectionString);
             var repo = sut.BaseRepo(db.users);
 
-            repo.create(user, function () {
-                repo.create({userName: 'wayne'}, function () {
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
                     repo.getOne({userName: 'who?'}, function (err, res) {
                         expect(res).toBeDefined();
                         expect(res).toBeNull();
@@ -856,13 +1463,100 @@ describe('BaseRepo', function () {
         });
     });
 
+    describe('has a function findOne() which', function () {
+        it('should throw an exception if the params are of wrong type', function () {
+            expect(function () { return userRepo.findOne(); }).toThrow();
+            expect(function () { return userRepo.findOne({}); }).toThrow();
+            expect(function () { return userRepo.findOne(1, 2); }).toThrow();
+            expect(function () { return userRepo.findOne(1, 2, 3); }).toThrow();
+        });
+
+        it('should return one document of the collection', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
+                    repo.findOne({userName: 'chuck'}, function (err, res) {
+                        expect(res).toBeDefined();
+                        expect(res.userName).toBe('chuck');
+                        expect(res.lastName).toBe('Norris');
+
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('should callback with an error if the param "query" is not an object', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
+                    repo.findOne(123, function (err, res) {
+                        expect(err).toBeDefined();
+                        expect(err instanceof TypeError).toBeTruthy();
+                        expect(res).toBeNull();
+
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('should return one document of the collection and check the query', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
+                    repo.findOne({fields: ['_id']}, function (err, res) {
+                        expect(res).toBeDefined();
+                        expect(res._id).toBeDefined();
+
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('should return no document when the collection is empty', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.findOne({}, function (err, res) {
+                expect(res).toBeDefined();
+                expect(res).toBeNull();
+
+                done();
+            });
+        });
+
+        it('should return no document when the query not matches any document of the collection', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
+                    repo.findOne({userName: 'who?'}, function (err, res) {
+                        expect(res).toBeDefined();
+                        expect(res).toBeNull();
+
+                        done();
+                    });
+                });
+            });
+        });
+    });
+
     describe('has a function getOneById() which', function () {
         it('should return one document of the collection', function (done) {
             var db = sut.GetDb(connectionString);
             var repo = sut.BaseRepo(db.users);
 
-            repo.create(user, function () {
-                repo.create({userName: 'wayne'}, function () {
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
                     repo.getOne({userName: 'chuck'}, function (err, res) {
                         expect(res).toBeDefined();
 
@@ -908,7 +1602,7 @@ describe('BaseRepo', function () {
             repo.getOneById(123, function (err, res) {
                 expect(err).toBeDefined();
                 expect(err instanceof TypeError).toBeTruthy();
-                expect(err.message).toBe('Param "id" is of type [object Number]! Type [object Object] or [object String] expected');
+                expect(err.message).toBe('Param "id" is of type number! Type object or string expected');
                 expect(res).toBeDefined();
                 expect(res).toBeNull();
 
@@ -923,14 +1617,14 @@ describe('BaseRepo', function () {
             repo.getOneById(null, function (err, res) {
                 expect(err).toBeDefined();
                 expect(err instanceof TypeError).toBeTruthy();
-                expect(err.message).toBe('Param "id" is of type [object Null]! Type [object Object] or [object String] expected');
+                expect(err.message).toBe('Param "id" is of type null! Type object or string expected');
                 expect(res).toBeDefined();
                 expect(res).toBe(null);
 
                 repo.getOneById(undefined, function (err, res) {
                     expect(err).toBeDefined();
                     expect(err instanceof TypeError).toBeTruthy();
-                    expect(err.message).toBe('Param "id" is of type [object Undefined]! Type [object Object] or [object String] expected');
+                    expect(err.message).toBe('Param "id" is of type undefined! Type object or string expected');
                     expect(res).toBeDefined();
                     expect(res).toBe(null);
 
@@ -953,13 +1647,106 @@ describe('BaseRepo', function () {
         });
     });
 
+    describe('has a function findOneById() which', function () {
+        it('should return one document of the collection', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
+                    repo.findOne({userName: 'chuck'}, function (err, res) {
+                        expect(res).toBeDefined();
+
+                        repo.findOneById(res._id, function (err, res1) {
+                            expect(res1).toBeDefined();
+                            expect(res1._id.toString()).toBe(res._id.toString());
+                            expect(res1.userName).toBe('chuck');
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('should return no document when the collection is empty', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.findOneById('5108e9333cb086801f000035', function (err, res) {
+                expect(res).toBeDefined();
+                expect(res).toBeNull();
+
+                done();
+            });
+        });
+
+        it('should return no document when the id not matches any document of the collection', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.findOneById('5108e9333cb086801f000035', function (err, res) {
+                expect(res).toBeDefined();
+                expect(res).toBe(null);
+
+                done();
+            });
+        });
+
+        it('should return no document when the id is of wrong type', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.findOneById(123, function (err, res) {
+                expect(err).toBeDefined();
+                expect(err instanceof TypeError).toBeTruthy();
+                expect(err.message).toBe('Param "id" is of type number! Type object or string expected');
+                expect(res).toBeDefined();
+                expect(res).toBeNull();
+
+                done();
+            });
+        });
+
+        it('should return no document when the id undefined or null', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.findOneById(null, function (err, res) {
+                expect(err).toBeDefined();
+                expect(err instanceof TypeError).toBeTruthy();
+                expect(err.message).toBe('Param "id" is of type null! Type object or string expected');
+                expect(res).toBeDefined();
+                expect(res).toBe(null);
+
+                repo.findOneById(undefined, function (err, res) {
+                    expect(err).toBeDefined();
+                    expect(err instanceof TypeError).toBeTruthy();
+                    expect(err.message).toBe('Param "id" is of type undefined! Type object or string expected');
+                    expect(res).toBeDefined();
+                    expect(res).toBe(null);
+
+                    done();
+                });
+            });
+        });
+
+        it('should throw an exception when the params are of wrong type', function () {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            expect(function () { return repo.findOneById(1, 2, 3); }).toThrow();
+            expect(function () { return repo.findOneById(null, undefined, 'test'); }).toThrow();
+            expect(function () { return repo.findOneById(); }).toThrow();
+        });
+    });
+
     describe('has a function update() which', function () {
         it('should update the document of the collection', function (done) {
             var db = sut.GetDb(connectionString);
             var repo = sut.BaseRepo(db.users);
 
-            repo.create(user, function () {
-                repo.create({userName: 'wayne'}, function () {
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
                     repo.update({userName: 'chuck'}, {'$set': {userName: 'bob'}}, function (err, res) {
                         expect(res).toBeDefined();
                         expect(res).toBe(1);
@@ -981,8 +1768,8 @@ describe('BaseRepo', function () {
             var db = sut.GetDb(connectionString);
             var repo = sut.BaseRepo(db.users);
 
-            repo.create(user, function () {
-                repo.create({userName: 'wayne'}, function () {
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
                     repo.update({userName: 'chuck1'}, {userName: 'bob'}, function (err, res) {
                         expect(res).toBeDefined();
                         expect(res).toBe(0);
@@ -1016,7 +1803,7 @@ describe('BaseRepo', function () {
                 age: 44
             };
 
-            userRepo.create(user, function () {
+            userRepo.insert(user, function () {
                 userRepo.update({userName: 'chuck'}, {'$set': {userName: 'bob'}}, function (err, res) {
                     expect(res).toBeDefined();
                     expect(res).toBe(1);
@@ -1044,7 +1831,7 @@ describe('BaseRepo', function () {
                 age: 44
             };
 
-            userRepo.create(user, function () {
+            userRepo.insert(user, function () {
                 userRepo.update({userName: 'chuck'}, {'$set': {userName: 'bob'}}, null, function (err, res) {
                     expect(res).toBeDefined();
                     expect(res).toBe(1);
@@ -1075,18 +1862,18 @@ describe('BaseRepo', function () {
                 userName: 'chuck'
             };
 
-            userRepo.create(user1, function () {
-                userRepo.create(user2, function () {
-                    userRepo.getCount({userName: 'chuck'}, function(err, res){
+            userRepo.insert(user1, function () {
+                userRepo.insert(user2, function () {
+                    userRepo.getCount({userName: 'chuck'}, function (err, res) {
                         expect(res).toBe(2);
 
                         userRepo.update({userName: 'chuck'}, {'$set': {userName: 'bob'}}, {multi: true}, function (err, res) {
                             expect(res).toBeDefined();
                             expect(res).toBe(2);
 
-                            userRepo.getCount({userName: 'chuck'}, function(err, res){
+                            userRepo.getCount({userName: 'chuck'}, function (err, res) {
                                 expect(res).toBe(0);
-                                userRepo.getCount({userName: 'bob'}, function(err, res){
+                                userRepo.getCount({userName: 'bob'}, function (err, res) {
                                     expect(res).toBe(2);
 
                                     done();
@@ -1108,7 +1895,7 @@ describe('BaseRepo', function () {
                 age: 44
             };
 
-            userRepo.create(user, function (err, res) {
+            userRepo.insert(user, function (err, res) {
                 res[0].userName = 'bob';
 
                 userRepo.update({userName: 'chuck'}, {'$set': res[0]}, function (err, res) {
@@ -1148,8 +1935,8 @@ describe('BaseRepo', function () {
             var db = sut.GetDb(connectionString);
             var repo = sut.BaseRepo(db.users);
 
-            repo.create(user, function () {
-                repo.create({userName: 'wayne'}, function () {
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
                     repo.delete({userName: 'chuck'}, function (err, res) {
                         expect(res).toBeDefined();
                         expect(res).toBe(1);
@@ -1174,8 +1961,8 @@ describe('BaseRepo', function () {
         });
 
         it('should remove nothing when the id is of wrong type', function (done) {
-            userRepo.create(user, function () {
-                userRepo.create({userName: 'wayne'}, function () {
+            userRepo.insert(user, function () {
+                userRepo.insert({userName: 'wayne'}, function () {
                     userRepo.delete({_id: null}, function (err, res) {
                         expect(err).toBeNull();
                         expect(res).toBeDefined();
@@ -1194,18 +1981,18 @@ describe('BaseRepo', function () {
         });
 
         it('should return an error callback when the param "id" is not of type object or string', function (done) {
-            userRepo.create(user, function () {
-                userRepo.create({userName: 'wayne'}, function () {
+            userRepo.insert(user, function () {
+                userRepo.insert({userName: 'wayne'}, function () {
                     userRepo.delete(null, function (err, res) {
                         expect(err).toBeDefined();
                         expect(err instanceof TypeError).toBeTruthy();
-                        expect(err.message).toBe('Param "query" is of type [object Null]! Type [object Object] expected');
+                        expect(err.message).toBe('Param "query" is of type null! Type object expected');
                         expect(res).toBeNull();
 
                         userRepo.delete(undefined, function (err, res) {
                             expect(err).toBeDefined();
                             expect(err instanceof TypeError).toBeTruthy();
-                            expect(err.message).toBe('Param "query" is of type [object Undefined]! Type [object Object] expected');
+                            expect(err.message).toBe('Param "query" is of type undefined! Type object expected');
                             expect(res).toBeNull();
 
                             done();
@@ -1219,8 +2006,8 @@ describe('BaseRepo', function () {
             var db = sut.GetDb(connectionString);
             var repo = sut.BaseRepo(db.users);
 
-            repo.create(user, function () {
-                repo.create({userName: 'chuck'}, function () {
+            repo.insert(user, function () {
+                repo.insert({userName: 'chuck'}, function () {
                     repo.getCount(function (err, res) {
                         expect(res).toBe(2);
 
@@ -1254,12 +2041,172 @@ describe('BaseRepo', function () {
         });
     });
 
+    describe('has a function remove() which', function () {
+        it('should remove the document of the collection with a query', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
+                    repo.insert({userName: 'troll'}, function () {
+                        repo.remove({userName: 'chuck'}, function (err, res) {
+                            expect(err).toBeNull();
+                            expect(res).toBe(1);
+
+                            repo.getCount(function (err, res1) {
+                                expect(res1).toBe(2);
+
+                                repo.remove({userName: 'wayne'}, {w: 1}, function (err, res2) {
+                                    expect(res2).toBeDefined();
+                                    expect(res2).toBe(1);
+
+                                    repo.getCount(function (err, res3) {
+                                        expect(res3).toBe(1);
+
+                                        repo.remove({userName: 'troll'});
+
+                                        setTimeout(function () {
+                                            repo.getCount(function (err, res) {
+                                                expect(res).toBe(0);
+
+                                                done();
+                                            });
+                                        }, 100);
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
+
+        it('should remove all documents of the collection', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
+                    repo.remove();
+
+                    setTimeout(function () {
+                        repo.getCount(function (err, res) {
+                            expect(res).toBe(0);
+
+                            done();
+                        });
+                    }, 100);
+                });
+            });
+        });
+
+        it('should remove all documents of the collection with options', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
+                    repo.remove({w: 1});
+
+                    setTimeout(function () {
+                        repo.getCount(function (err, res) {
+                            expect(res).toBe(0);
+
+                            done();
+                        });
+                    }, 100);
+                });
+            });
+        });
+
+        it('should remove all documents of the collection with callback', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
+                    repo.remove(function () {
+                        repo.getCount(function (err, res) {
+                            expect(res).toBe(0);
+
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('should remove all documents of the collection with callback', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
+                    repo.remove({w: 1}, function () {
+                        repo.getCount(function (err, res) {
+                            expect(res).toBe(0);
+
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('should return an error callback when the param "query" is not of type object', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
+                    repo.remove(null, function (err, res) {
+                        expect(err).toBeDefined();
+                        expect(err instanceof TypeError).toBeTruthy();
+                        expect(err.message).toBe('Param "query" is of type null! Type object expected');
+                        expect(res).toBeNull();
+
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('should return an error callback when the param "options" is not of type object', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
+                    repo.remove({}, 33, function (err, res) {
+                        expect(err).toBeDefined();
+                        expect(err instanceof TypeError).toBeTruthy();
+                        expect(err.message).toBe('Param "options" is of type number! Type object expected');
+                        expect(res).toBeNull();
+
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('should throw an exception when params are of wrong type', function () {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            expect(function () { return repo.remove(1, 2); }).toThrow();
+            expect(function () { return repo.remove(1, 2, 3); }).toThrow();
+            expect(function () { return repo.remove({}, 1); }).toThrow();
+            expect(function () { return repo.remove({}, 1, 2); }).toThrow();
+            expect(function () { return repo.remove({}, {}, 2); }).toThrow();
+        });
+    });
+
     describe('has a function aggregate() which', function () {
         it('should return an error callback when the param "pipeline" is not of type array', function (done) {
             userRepo.aggregate('', {}, function (err, res) {
                 expect(err).toBeDefined();
                 expect(err instanceof TypeError).toBeTruthy();
-                expect(err.message).toBe('Param "pipeline" is of type [object String]! Type [object Array] expected');
+                expect(err.message).toBe('Param "pipeline" is of type string! Type array expected');
                 expect(res).toBeNull();
 
                 done();
@@ -1276,9 +2223,9 @@ describe('BaseRepo', function () {
             var db = sut.GetDb(connectionString);
             var repo = sut.BaseRepo(db.users);
 
-            repo.create(user, function () {
-                repo.create({userName: 'wayne', age: 20}, function () {
-                    repo.create({userName: 'hans', age: 30}, function () {
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne', age: 20}, function () {
+                    repo.insert({userName: 'hans', age: 30}, function () {
                         repo.aggregate(pipeline, {}, function (err, res) {
                             expect(err).toBeNull();
                             expect(res).toBeDefined();
@@ -1300,9 +2247,9 @@ describe('BaseRepo', function () {
             var db = sut.GetDb(connectionString);
             var repo = sut.BaseRepo(db.users);
 
-            repo.create(user, function () {
-                repo.create({userName: 'wayne', age: 20}, function () {
-                    repo.create({userName: 'hans', age: 30}, function () {
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne', age: 20}, function () {
+                    repo.insert({userName: 'hans', age: 30}, function () {
                         repo.aggregate(pipeline, function (err, res) {
                             expect(err).toBeNull();
                             expect(res).toBeDefined();
@@ -1324,9 +2271,9 @@ describe('BaseRepo', function () {
             var db = sut.GetDb(connectionString);
             var repo = sut.BaseRepo(db.users);
 
-            repo.create(user, function () {
-                repo.create({userName: 'wayne', age: 20}, function () {
-                    repo.create({userName: 'hans', age: 30}, function () {
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne', age: 20}, function () {
+                    repo.insert({userName: 'hans', age: 30}, function () {
                         repo.aggregate(pipeline, null, function (err, res) {
                             expect(err).toBeNull();
                             expect(res).toBeDefined();
