@@ -16,12 +16,12 @@ var lxDb = require('lx-mongodb'),
     repo = lxDb.BaseRepo(db.users);
 
 // get all users
-repo.getAll(function(error, result) {
+repo.find(function(error, result) {
 	console.log(result);
 });
 
 // add user
-repo.create({userName: 'wayne', age: 99}, function(error, result) {
+repo.insert({userName: 'wayne', age: 99}, function(error, result) {
 	console.log(result);
 });
 ```
