@@ -21,7 +21,7 @@ repo.getAll(function(error, result) {
 });
 
 // add user
-repo.create({name: 'wayne', age: 99}, function(error, result) {
+repo.create({userName: 'wayne', age: 99}, function(error, result) {
 	console.log(result);
 });
 ```
@@ -64,12 +64,12 @@ var lxDb = require('lx-mongodb'),
     userRepo = require('./userRepo.js').UserRepository(db.users);
 
 // get all users
-userRepo.getAll(function(err, res) {
+userRepo.find(function(err, res) {
     console.log(res); // array of users
 });
 
 // create new user
-userRepo.create({userName: 'Wayne', age: 99}, function(err, res) {
+userRepo.insert({userName: 'Wayne', age: 99}, function(err, res) {
     console.log(res); // user object
 });
 ```
@@ -100,7 +100,6 @@ exports.UserRepository = function (collection) {
                     },
                     birthdate: {
                         type: 'string',
-                        required: true,
                         format: 'date-time'
                     },
                 }
@@ -108,33 +107,45 @@ exports.UserRepository = function (collection) {
         },
         baseRepo = lxDb.BaseRepo(collection, schema);
 
-    // Validierung des User Namens
-    baseRepo.checkUserName = function (userName, callback) {
-        collection.findOne({userName: userName}, function (err, res) {
+    // validation function for the userName
+    baseRepo.checkUserName = function (doc, callback) {
+        if (!doc) {
+            callback(null, {valid: true});
+            return;
+        }
+
+        var query = {
+            userName: doc.userName,
+            _id: {
+                $ne: typeof doc._id === 'string' ? baseRepo.convertId(doc._id) : doc._id
+            }
+        };
+
+        baseRepo.findOne(query, function (err, res) {
             if (err) {
                 callback(err);
             } else if (res) {
                 callback(null,
-                {
-                    valid: false,
-                    errors: [
-                        {
-                            attribute: 'checkUserName',
-                            property: 'userName',
-                            expected: false,
-                            actual: true,
-                            message: 'userName already exists'
-                        }
-                    ]
-                });
-            }
-            else {
+                    {
+                        valid: false,
+                        errors: [
+                            {
+                                attribute: 'checkUserName',
+                                property: 'userName',
+                                expected: false,
+                                actual: true,
+                                message: 'already exists'
+                            }
+                        ]
+                    }
+                );
+            } else {
                 callback(null, {valid: true});
             }
         });
     };
 
-    // Definition der Validierungsfunktion
+    // validation function
     baseRepo.validate = function (doc, isUpdate, schema, callback) {
         var userNameCheck = true;
 
@@ -174,15 +185,15 @@ var lxDb = require('lx-mongodb'),
     userRepo = require('./userRepo.js').UserRepository(db.users);
 
 // create new user
-userRepo.create({userName: 'Wayne', age: 99}, function(err, res) {
+userRepo.insert({userName: 'Wayne', age: 99}, function(err, res) {
     console.log(res); // User Objekt
 });
 
 // JSON schema validation of the user
 userRepo.validate({userName: 'Wayne', age: 99}, function(err, res) {
     res.valid === false // true
-    res.errors[0].property === 'birthdate' // true
-    res.errors[0].message === 'birthdate is required' // true
+    res.errors[0].property === 'email' // true
+    res.errors[0].message === 'email is required' // true
 });
 
 // async schema validation of the user
@@ -652,7 +663,7 @@ repo.insert({name: 'Litixsoft', city: 'Leipzig'}, function(err, res) {
     // more logic here
 });
 
-// insert with callback
+// insert with options and callback
 repo.insert({name: 'Litixsoft'}, {w: 1}, function(err, res) {
     // more logic here
 })
