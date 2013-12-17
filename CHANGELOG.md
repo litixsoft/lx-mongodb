@@ -1,3 +1,11 @@
+<a name="v0.5.2"></a>
+### v0.5.2 (2013-12-17)
+
+
+#### Features
+
+* add collection to db object when db object is loaded from cache and the collecti ([495a129b](https://github.com/litixsoft/lx-mongodb/commit/495a129bb5f8cb33ffc059e57aa4f0872dd85033))
+
 ## v0.5.1
 * set dependency mongodb to v1.3.19 since there is an error with v1.3.20
 
