@@ -839,7 +839,9 @@ repo.put(new Buffer('Litixsoft'), {metadata: {'type': 'string'}}, function(err, 
 ```
 
 ## Contributing
-In lieu of a formal styleguide take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [grunt](http://gruntjs.com/).
+In lieu of a formal styleguide take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Please create descriptive commit messages.
+We use a git hook to validate the commit messages against these [rules](https://docs.google.com/document/d/1QrDFcIiPjSLDn3EL15IJygNPiHORgU1_OOAqWjiDU5Y/edit#heading=h.uyo6cb12dt6w).
+Lint and test your code using [grunt](http://gruntjs.com/).
 
 ## Author
 [Litixsoft GmbH](http://www.litixsoft.de)

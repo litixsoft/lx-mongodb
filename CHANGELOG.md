@@ -1,4 +1,3 @@
-# Release History
 ## v0.5.1
 * set dependency mongodb to v1.3.19 since there is an error with v1.3.20
 
