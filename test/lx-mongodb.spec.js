@@ -78,6 +78,28 @@ describe('lx-mongodb', function () {
             expect(typeof db.comments).toBe('object');
         });
 
+        it('should return the db from cache and add the collection if it is not already there', function () {
+            var db = sut.GetDb(connectionString, ['demo', 'a.b.c']);
+
+            expect(db).toBeDefined();
+            expect(typeof db).toBe('object');
+            expect(db.users).toBeDefined();
+            expect(typeof db.users).toBe('object');
+            expect(db.posts).toBeDefined();
+            expect(typeof db.posts).toBe('object');
+            expect(db.tags).toBeDefined();
+            expect(typeof db.tags).toBe('object');
+            expect(db.categories).toBeDefined();
+            expect(typeof db.categories).toBe('object');
+            expect(db.comments).toBeDefined();
+            expect(typeof db.comments).toBe('object');
+            expect(db.demo).toBeDefined();
+            expect(typeof db.demo).toBe('object');
+            expect(db.a.b.c).toBeDefined();
+            expect(typeof db.a.b.c).toBe('object');
+            expect(db.b).toBeUndefined();
+        });
+
         it('should return the db', function () {
             var db = sut.GetDb(connectionString);
 
