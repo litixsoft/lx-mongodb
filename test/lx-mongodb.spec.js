@@ -984,6 +984,27 @@ describe('BaseRepo', function () {
             });
         });
 
+        it('should return one document of the collection and convert the id to a mongo id', function (done) {
+            var db = sut.GetDb(connectionString);
+            var repo = sut.BaseRepo(db.users);
+
+            repo.insert(user, function () {
+                repo.insert({userName: 'wayne'}, function () {
+                    repo.findOne({userName: 'chuck'}, function (err, res) {
+                        expect(res).toBeDefined();
+
+                        repo.findOneById(res._id.toHexString(), function (err, res1) {
+                            expect(err).toBeNull();
+                            expect(res1).not.toBeNull();
+                            expect(res1._id.toString()).toBe(res._id.toString());
+                            expect(res1.userName).toBe('chuck');
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
         it('should return no document when the collection is empty', function (done) {
             var db = sut.GetDb(connectionString);
             var repo = sut.BaseRepo(db.users);
