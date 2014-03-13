@@ -1,3 +1,18 @@
+<a name="0.6.0"></a>
+## 0.6.0 (2014-03-13)
+
+
+#### Bug Fixes
+
+* findOneById now converts the id to a mongo ObjectID when the id is a string ([0fe51a84](https://github.com/litixsoft/lx-mongodb/commit/0fe51a846244c15b19b242dfc950e14bde615ef0))
+
+
+#### Breaking Changes
+
+* removed all deprecated functions (getAll, getOne, getOneById, getCount, insert, delete)
+ ([1c753311](https://github.com/litixsoft/lx-mongodb/commit/1c7533110e6e294bffb25488cd051b166e22f471))
+
+
 <a name="v0.5.2"></a>
 ### v0.5.2 (2013-12-17)
 
