@@ -215,16 +215,10 @@ userRepo.validate({userName: 'Wayne', age: 99}, function(err, res) {
 * [createNewId](#createNewId)
 * [convertId](#convertId)
 * [count](#count)
-* [create](#create) (deprecated)
-* [delete](#BaseRepository) (deprecated)
 * [find](#find)
 * [findOne](#findOne)
 * [findOneById](#findOneById)
-* [getAll](#getAll) (deprecated)
 * [getCollection](#getCollection)
-* [getCount](#getCount) (deprecated)
-* [getOne](#getOne) (deprecated)
-* [getOneById](#getOneById) (deprecated)
 * [getSchema](#getSchema)
 * [getValidationOptions](#getValidationOptions)
 * [insert](#insert)
@@ -346,24 +340,6 @@ _id instanceof ObjectID === true; // true
 ```
 --
 
-<a name="create" />
-#### create(doc, callback)
-Creates one or more records in the mongoDb.
-
-__Arguments__
-
-* __doc__ `{Array|Object}` - The data.
-* __callback__ `{!function(err, res)}` - The callback function.
-
-```js
-var repo = BaseRepo(collection, schema);
-
-repo.create({name: 'Litixsoft', city: 'Leipzig'}, function(err, res) {
-    // more logic here
-});
-```
---
-
 <a name="count" />
 #### count(query, options, callback)
 Returns the number of records.
@@ -389,28 +365,6 @@ repo.count({name: 'wayne'}, function(err, res) {
 
 // count all with options
 repo.count({skip: 1, limit: 5}, function(err, res) {
-    // more logic here
-});
-```
---
-
-<a name="delete" />
-#### delete(query, callback)
-Deletes one or more records in the mongoDb.
-
-__Arguments__
-
-* __query__ `{Object}` - The query.
-* __callback__ `{function(err, res)}` - The callback function.
-
-```js
-var repo = BaseRepo(collection, schema);
-
-repo.delete({_id: '5108e9333cb086801f000035'}, function(err, res) {
-    // more logic here
-});
-
-repo.delete({city: 'Berlin'}, function(err, res) {
     // more logic here
 });
 ```
@@ -507,33 +461,6 @@ repo.findOneById(myId, {fields: ['name', 'city']}, function(err, res) {
 ```
 --
 
-<a name="getAll" />
-#### getAll(query, options, callback)
-Gets the records from the mongoDb.
-
-__Arguments__
-
-* __query__ `{Object=}` - The query.
-* __options__ `{Object=}` - The mongoDb query options.
-* __options.fields__ `{(Array|Object)=}` - The fields which should be returned by the query.
-* __options.limit__ `{Number=}` - The number of records which should be returned by the query.
-* __options.skip__ `{Number=}`- The number of records which should be skipped by the query.
-* __options.sort__ `{(Array|String|Object)=}` - The sorting of the returned records.
-* __callback__ `{function(err, res)}` - The callback function.
-
-```js
-var repo = BaseRepo(collection, schema);
-
-repo.getAll({}, function(err, res) {
-    // more logic here
-});
-
-repo.getAll({name: 'Litixsoft'}, {skip: 0, limit: 10, sort: {name: 1}, fields: ['name', 'city']}, function(err, res) {
-    // more logic here
-});
-```
---
-
 <a name="getCollection" />
 #### getCollection()
 Returns the mongoDb collection object.
@@ -543,76 +470,6 @@ var repo = BaseRepo(collection, schema),
     myCollection = repo.getCollection();
 
 collection == myCollection; // true
-```
---
-
-<a name="getCount" />
-#### getCount(query, callback)
-Returns the number of records.
-
-__Arguments__
-
-* __query__ `{Object}` - The query.
-* __callback__ `{function(err, res)}` - The callback function.
-
-```js
-var repo = BaseRepo(collection, schema);
-
-repo.getCount({}, function(err, res) {
-    // more logic here
-});
-```
---
-
-<a name="getOne" />
-#### getOne(query, options, callback)
-Gets one record from the mongoDb.
-
-__Arguments__
-
-* __query__ `{Object=}` - The query.
-* __options__ `{Object=}` - The mongoDb query options.
-* __options.fields__ `{(Array|Object)=}` - The fields which should be returned by the query.
-* __options.limit__ `{Number=}` - The number of records which should be returned by the query.
-* __options.skip__ `{Number=}`- The number of records which should be skipped by the query.
-* __options.sort__ `{(Array|String|Object)=}` - The sorting of the returned records.
-* __callback__ `{function(err, res)}` - The callback function.
-
-```js
-var repo = BaseRepo(collection, schema);
-
-repo.getOne({name: 'Litixsoft'}, function(err, res) {
-    // more logic here
-});
-
-repo.getOne({name: 'Litixsoft'}, {skip: 0, limit: 10, sort: {name: 1}, fields: ['name', 'city']}, function(err, res) {
-    // more logic here
-});
-```
---
-
-<a name="getOneById" />
-#### getOneById(id, options, callback)
-Gets one record by id from the mongoDb.
-
-__Arguments__
-
-* __id__ `{Object|string}` - The id.
-* __options__ `{Object=}` - The mongoDb query options.
-* __options.fields__ `{(Array|Object)=}` - The fields which should be returned by the query.
-* __callback__ `{function(err, res)}` - The callback function.
-
-```js
-var repo = BaseRepo(collection, schema),
-    myId = repo.convertId('5108e9333cb086801f000035');
-
-repo.getOneById('5108e9333cb086801f000035', function(err, res) {
-    // more logic here
-});
-
-repo.getOneById(myId, {fields: ['name', 'city']}, function(err, res) {
-    // more logic here
-});
 ```
 --
 
@@ -847,7 +704,7 @@ Lint and test your code using [grunt](http://gruntjs.com/).
 [Litixsoft GmbH](http://www.litixsoft.de)
 
 ## License
-Copyright (C) 2013 Litixsoft GmbH <info@litixsoft.de>
+Copyright (C) 2013-2014 Litixsoft GmbH <info@litixsoft.de>
 Licensed under the MIT license.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
