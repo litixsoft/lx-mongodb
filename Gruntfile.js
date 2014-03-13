@@ -1,5 +1,4 @@
 'use strict';
-var fs = require('fs');
 
 module.exports = function (grunt) {
     // load grunt tasks
@@ -9,14 +8,6 @@ module.exports = function (grunt) {
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         jshint_files_to_test: ['Gruntfile.js', 'lib/**/*.js', 'test/**/*.js'],
-        banner: '/*!\n' +
-            ' * <%= pkg.title || pkg.name %> - v<%= pkg.version %> - <%= grunt.template.today("yyyy-mm-dd") %>\n' +
-            '<%= pkg.homepage ? " * " + pkg.homepage + "\\n" : "" %>' +
-            ' *\n' +
-            ' * Copyright (c) <%= grunt.template.today("yyyy") %> <%= pkg.author.name %>\n' +
-            ' * Licensed <%= _.pluck(pkg.licenses, "type").join(", ") %>\n' +
-            ' */\n\n',
-        // Before generating any new files, remove any previously-created files.
         clean: {
             jasmine: ['build/jasmine'],
             coverage: ['build/coverage']
@@ -59,15 +50,22 @@ module.exports = function (grunt) {
             }
         },
         jasmine_node: {
-            specNameMatcher: './*.spec', // load only specs containing specNameMatcher
-            projectRoot: 'test',
-            requirejs: false,
-            forceExit: true,
-            jUnit: {
-                report: true,
-                savePath: 'build/reports/jasmine/',
-                useDotNotation: true,
-                consolidate: true
+            options: {
+                specNameMatcher: './*.spec', // load only specs containing specNameMatcher
+                requirejs: false,
+                forceExit: true
+            },
+            test: ['test/'],
+            ci: {
+                options: {
+                    jUnit: {
+                        report: true,
+                        savePath: 'build/reports/jasmine/',
+                        useDotNotation: true,
+                        consolidate: true
+                    }
+                },
+                src: ['test/']
             }
         },
         changelog: {
@@ -87,13 +85,13 @@ module.exports = function (grunt) {
     // Register tasks.
     grunt.registerTask('git:commitHook', 'Install git commit hook', function () {
         grunt.file.copy('validate-commit-msg.js', '.git/hooks/commit-msg');
-        fs.chmodSync('.git/hooks/commit-msg', '0755');
+        require('fs').chmodSync('.git/hooks/commit-msg', '0755');
         grunt.log.ok('Registered git hook: commit-msg');
     });
 
-    grunt.registerTask('test', ['git:commitHook', 'clean:jasmine', 'jshint:test', 'jasmine_node']);
+    grunt.registerTask('test', ['git:commitHook', 'clean:jasmine', 'jshint:test', 'jasmine_node:test']);
     grunt.registerTask('cover', ['clean:coverage', 'jshint:test', 'bgShell:coverage', 'open']);
-    grunt.registerTask('ci', ['clean', 'jshint:jslint', 'jshint:checkstyle', 'bgShell:coverage', 'bgShell:cobertura', 'jasmine_node']);
+    grunt.registerTask('ci', ['clean', 'jshint:jslint', 'jshint:checkstyle', 'bgShell:coverage', 'bgShell:cobertura', 'jasmine_node:ci']);
     grunt.registerTask('release', 'Bump version, update changelog and tag version', function (version) {
         grunt.task.run([
             'bump:' + (version || 'patch') + ':bump-only',
