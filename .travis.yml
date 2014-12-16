@@ -1,11 +1,14 @@
 services:
-  - mongodb
+- mongodb
 language: node_js
 node_js:
-  - '0.10'
-  - '0.11'
+- '0.10'
+- '0.11'
 before_script:
-  - npm install -g grunt-cli
+- npm install -g grunt-cli
 matrix:
   allow_failures:
-    - node_js: '0.11'
+  - node_js: '0.11'
+notifications:
+  slack:
+    secure: sTDN1ND+CiZEt5/8cUHSlTaJ9O78qoj3SWTNDIwvPPqrIJFvxM4rSUnOMMQ5vOxRyZ/FfnWd9FuUAdHi0sRPl/1bznHv+g9mMW+hbUywaq6JD4qu6e5RbAOF4A9p8svhwYUL2Xv51iggeNkTZd42IZd9pH/YBVHHuyR77XKfrfM=
