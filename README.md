@@ -1,4 +1,4 @@
-# lx-mongodb [![Build Status](https://img.shields.io/travis/litixsoft/lx-mongodb/master.svg)](https://travis-ci.org/litixsoft/lx-mongodb) [![david-dm](https://david-dm.org/litixsoft/lx-mongodb.png)](https://david-dm.org/litixsoft/lx-mongodb/) [![david-dm](https://david-dm.org/litixsoft/lx-mongodb/dev-status.png)](https://david-dm.org/litixsoft/lx-mongodb#info=devDependencies&view=table)
+# lx-mongodb
 
 > Litixsoft backend driver for mongoDb based on mongojs.
 
@@ -6,9 +6,6 @@
 [![Build Status](https://secure.travis-ci.org/litixsoft/baboon-backend.svg?branch=master)](https://travis-ci.org/litixsoft/baboon-backend)
 [![david-dm](https://david-dm.org/litixsoft/baboon-backend.svg?theme=shields.io)](https://david-dm.org/litixsoft/baboon-backend/)
 [![david-dm](https://david-dm.org/litixsoft/baboon-backend/dev-status.svg?theme=shields.io)](https://david-dm.org/litixsoft/baboon-backend#info=devDependencies&view=table)
-
-
-
 
 ## Install
 [![NPM](https://nodei.co/npm/lx-mongodb.png??downloads=true&stars=true)](https://nodei.co/npm/lx-mongodb/)
