@@ -2,10 +2,8 @@
 
 > Litixsoft backend driver for mongoDb based on mongojs.
 
-> [![npm](http://img.shields.io/npm/v/baboon-backend.svg)](https://www.npmjs.org/package/baboon-backend)
-[![Build Status](https://secure.travis-ci.org/litixsoft/baboon-backend.svg?branch=master)](https://travis-ci.org/litixsoft/baboon-backend)
-[![david-dm](https://david-dm.org/litixsoft/baboon-backend.svg?theme=shields.io)](https://david-dm.org/litixsoft/baboon-backend/)
-[![david-dm](https://david-dm.org/litixsoft/baboon-backend/dev-status.svg?theme=shields.io)](https://david-dm.org/litixsoft/baboon-backend#info=devDependencies&view=table)
+> [![npm](http://img.shields.io/npm/v/lx-mongodb.svg)](https://www.npmjs.org/package/lx-mongodb)
+[![Build Status](https://secure.travis-ci.org/litixsoft/lx-mongodb.svg?branch=master)](https://travis-ci.org/litixsoft/lx-mongodb)
 
 ## Install
 [![NPM](https://nodei.co/npm/lx-mongodb.png??downloads=true&stars=true)](https://nodei.co/npm/lx-mongodb/)
