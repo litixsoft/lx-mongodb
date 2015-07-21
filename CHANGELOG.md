@@ -1,3 +1,12 @@
+<a name="v0.7.0"></a>
+### v0.7.0 (2015-07-21)
+
+
+#### Features
+
+* update to mongodb 1.4.38 ([41e625f7](https://github.com/litixsoft/lx-mongodb/commit/41e625f766471602137e7b406e034f2f7d8d0e82))
+
+
 <a name="0.6.0"></a>
 ## 0.6.0 (2014-03-13)
 

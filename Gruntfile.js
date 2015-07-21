@@ -68,8 +68,11 @@ module.exports = function (grunt) {
                 src: ['test/']
             }
         },
-        changelog: {
+        conventionalChangelog: {
             options: {
+            },
+            release: {
+                src: 'CHANGELOG.md'
             }
         },
         bump: {
@@ -95,7 +98,7 @@ module.exports = function (grunt) {
     grunt.registerTask('release', 'Bump version, update changelog and tag version', function (version) {
         grunt.task.run([
             'bump:' + (version || 'patch') + ':bump-only',
-            'changelog',
+            'conventionalChangelog',
             'bump-commit'
         ]);
     });
