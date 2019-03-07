@@ -1,3 +1,6 @@
+    Project is deprecated. No continue development, no bugfixing anymore.
+---
+
 # lx-mongodb
 
 > Litixsoft backend driver for mongoDb based on mongojs.
